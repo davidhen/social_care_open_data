@@ -1,0 +1,332 @@
+---
+title: "Social Care Survey Open Data"
+subtitle: "Simple descriptive analysis"
+output: 
+  rmarkdown::html_document :
+    theme: readable
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/GitHub/soc_care_analysis')
+```
+
+#Introduction
+
+Here I will use the newly released `skimr` package to describe each of the three social care datasets. Generally looking for distributions and missing data levels. 
+
+The majority of variables are factors so we probabaly won't get the full benefit of `skimr` but am keen to try it out. 
+
+##Load data
+Load in tidied data 
+```{r load_data, cache=FALSE}
+load("produced_data/created_objects/soc_care10.rds")
+load("produced_data/created_objects/soc_care11.rds")
+load("produced_data/created_objects/soc_care12.rds")
+```
+
+##Load packages
+And required packages
+```{r package, message=FALSE, warning=FALSE}
+library(skimr)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(readr)
+library(purrr)
+library(stringr)
+library(tidyr)
+library(magrittr)
+library(forcats)
+library(DT)
+```
+
+
+#Examine data
+
+##Summaries using 'skimr`
+
+1st thing is to create skim objects for each year. I've printed the 2011 versions here as an example
+
+```{r skim_10}
+skim10 <- skim(soc_care10)
+skim11 <- skim(soc_care11)
+skim12 <- skim(soc_care12)
+
+datatable(skim11)
+skim11
+```
+
+Here we have both the `datatable()` and console version of the skim object. The former is a tidy object that can be manipulated any way we want - the latter is a handy summary of the dataset - I particularly like the counts of complete and missing cases.
+
+###sjmisc
+
+Alternative 16/08/2017
+
+```{r sjmisc}
+library(sjmisc)
+
+knitr::kable(descr(soc_care10))
+```
+
+##Councils
+
+1st thing I want to visualise is the absolute number of records returned for each council and what percentage of the total this is. 
+
+I'm going to stick with 2011 data for now. 
+
+```{r skim_coucil11, fig.width=12, fig.height=8}
+skim11 %>%
+  filter(var == "council") %>%
+  filter(stat == "count") %>%
+  filter(!is.na(level)) %>%
+  mutate(percentage = (value/sum(value)* 100)) %>%
+  arrange(-value) %>%
+  mutate(level = factor(level, level)) %>%
+  select(level, value, percentage) %>%
+  ggplot() +
+  geom_col(aes(x = level, y = value)) + 
+    geom_text(aes(label=paste0(round(percentage, 1),"%"), x= level,
+                            y= value), size=4, vjust = -0.5, colour = "black") +
+    theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
+    theme_hc() +
+  labs(
+    title = "Number of records returned for Social Care Survey 2011, with percentage of total",
+    subtitle = "by Local Authority", 
+    x = "Local Authority",
+    y = "Number of records")
+```
+
+
+# Population comparison
+
+How do these absolute numbers reflect the differing populations in each local authority?
+
+##Create main table
+
+2011 Popoulation estimates downloaded from the National Records of Scotland here:-  <https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/2011-census-reconciliation-report/list-of-tables>
+
+Create `pop_data_combined` a `data_frame` with population sizes of each Local Authority as a total and for over 65s
+
+```{r import_pop_data, warning=FALSE, message=FALSE}
+#Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
+
+#import and tidy raw data
+pop_data <- read_csv("raw_data/2011-cen-rec-report-pop-tab1b.csv", skip = 3) %>%
+  slice(1:34) %>%
+  filter(X1 %in% c("Council areas", "SCOTLAND") == FALSE) %>%
+  select(-X3, -X23, -X24) %>%
+  map_at(2:21, as.numeric) %>% #coerce from character to numeric
+  as_data_frame()
+
+names(pop_data) <- str_replace(names(pop_data), "X1", "council") #rename X variables
+names(pop_data) <- str_replace(names(pop_data), "X2", "total")
+
+#tidy data for manipulation
+pop_data %<>%
+  gather(age_grp, value, 2:21) %>%  
+  arrange(council)
+
+
+#create table of total population per council
+pop_data_total <-
+  pop_data %>%
+  filter(age_grp == "total") %>%  
+  select(-age_grp) %>%
+  arrange(council)
+names(pop_data_total) <- str_replace(names(pop_data_total), "value", "pop_total")
+
+#create table of total over65s per council
+pop_data_65plus <-
+  pop_data %>%
+  filter(age_grp %in% c("65 - 69", "70 - 74", "75 - 79", "80 - 84", "85 - 89", 
+                        "90+") == TRUE) %>%
+  group_by(council) %>%
+  mutate(pop_over_65 = sum(value)) %>%    
+  arrange(council) %>%
+  select(council, pop_over_65) %>%
+  unique(.)
+
+#join tables together
+pop_data_combined <-
+  full_join(pop_data_total, pop_data_65plus)  
+
+pop_data_combined
+
+rm(list = c("pop_data_65plus", "pop_data_total"))
+```
+
+##Add social care
+
+Add a column with total amount of records returned from each council i.e. the total number of indiviudals receiving some form of social care
+
+```{r skim_11_subset}
+
+#count number of records from each council
+any_care_11 <- fct_count(soc_care11$council)
+
+#rename tibble columns
+names(any_care_11) <- 
+  str_replace(names(any_care_11), "n", "any_care_total") %>%
+  str_replace(., "f", "council")
+
+#join this table to pop_data_combined
+pop_data_combined %<>%
+  full_join(., any_care_11)
+
+pop_data_combined
+
+rm(any_care_11)
+```
+
+##Add social care over 65s
+
+Add a column with total amount of records of over 65s from each local authority
+
+```{r subset_over_65}
+#subset over 65s from 2011 data
+any_care65s <-
+  soc_care11 %>%
+  filter(age_grp != "18-<65") 
+
+#now count by local authority
+care65s <- fct_count(any_care65s$council)
+names(care65s) <- 
+  str_replace(names(care65s), "n", "any_care_over_65s") %>%
+  str_replace(., "f", "council")
+
+#and add this to pop_data_combined
+pop_data_combined %<>%
+  full_join(., care65s)
+
+pop_data_combined
+
+rm(care65s)
+```
+
+##calculate ratios per 1000 population
+
+```{r calc_per_thousand}
+#calculate per 1000
+pop_data_combined %<>%
+  mutate(total_per_thousand = (any_care_total / pop_total) * 1000) %>%
+  mutate(over_65s_per_thousand = (any_care_over_65s / pop_over_65) * 1000)
+
+pop_data_combined
+```
+
+##Visualise over 65s
+
+```{r vis_pop, fig.width=12, fig.height=8}
+
+pop_data_combined %>%
+  arrange(-over_65s_per_thousand) %>%
+  mutate(council = factor(council, council)) %>%
+  ggplot() +
+  geom_col(aes(x = council, y = over_65s_per_thousand)) +
+  theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
+  theme_hc() +
+  labs(
+    title = "Number of over 65s per 1000 population receiving any form of social care, 2011",
+    x = "Local Authority area",
+    y = "rate per 1000 population"
+  )
+```
+
+##Highland
+
+```{r check_highland}
+highland <- 
+  soc_care11 %>%
+  filter(council == "Highland")
+
+nrow(highland)
+fct_count(highland$age_grp)
+```
+
+Highland is an outlier because `r round(2344/nrow(highland) * 100, 1)`% of its records have missing data for Age group. It is likely most of this missing data will be over 65s.
+
+
+```{r skim_highland}
+skim11_highland <- 
+  skim(highland) %>%
+  filter(stat == "missing") %>%
+  filter(value != 0)
+
+skim11_highland
+
+```
+
+Turns out (most likely) the same `r round(2344/nrow(highland) * 100, 1)`% of records are also missing data for `client-grp`, `gender`, and `living_arr`.
+
+##Visualise totals
+
+```{r vis_totals, fig.width=12, fig.height=8}
+pop_data_combined %>%
+  arrange(-total_per_thousand) %>%
+  mutate(council = factor(council, council)) %>%
+  ggplot() +
+  geom_col(aes(x = council, y = total_per_thousand)) +
+  theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
+  theme_hc() +
+  labs(
+    title = "Number per 1000 population receiving any form of social care, 2011",
+    x = "Local Authority area",
+    y = "rate per 1000 population"
+  )
+```
+
+##save created objects
+```{r save_obs, eval = FALSE}
+save(pop_data, file = "produced_data/created_objects/pop_data.rds")
+save(pop_data_combined, file = "produced_data/created_objects/pop_data_combined.rds")
+save(skim10, file = "produced_data/created_objects/skim10.rds")
+save(skim11, file = "produced_data/created_objects/skim11.rds")
+save(skim12, file= "produced_data/created_objects/skim12.rds")
+save(any_care65s, file = "produced_data/created_objects/any_care65s.rds")
+```
+
+#Variable by variable visualisation
+
+##Councils
+
+## Age Group
+
+## Client Group
+
+## Gender
+
+
+## Meals
+
+## Local Authority Provided Home Care Hours
+
+## Private Company Provided Home Care Hours
+
+## Voluntary Orgnaisation Provided Home Care Hours
+
+## Personal Care Home Care Hours
+
+## Total Home Care Hours
+
+## Home Care Client Flad
+
+## Living Arrangements
+
+## Mutli Staffing
+
+## Housing Type
+
+## Laundry
+
+## Shopping
+
+## Housing Support
+
+## IoRN Score
+
+#Interesting comparison

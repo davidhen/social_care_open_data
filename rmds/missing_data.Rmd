@@ -1,0 +1,279 @@
+---
+title: "Social Care Survey Open Data"
+subtitle: "Missing Data"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/GitHub/soc_care_analysis')
+loadNamespace('printr')
+```
+
+#Introduction
+
+Here I will describe missing data across the packages and impute missing data.
+
+##Load data
+Load in tidied data 
+```{r load_data, cache=FALSE}
+load("produced_data/created_objects/soc_care10.rds")
+load("produced_data/created_objects/soc_care11.rds")
+load("produced_data/created_objects/soc_care12.rds")
+load("produced_data/created_objects/skim10.rds")
+load("produced_data/created_objects/skim11.rds")
+load("produced_data/created_objects/skim12.rds")
+```
+
+##Load Packages
+
+```{r packages, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(geofacet)
+library(ggthemes)
+library(mice)
+library(VIM)
+```
+
+#2011 Data
+
+
+Sticking with 2011 for now.
+
+##Describe and visualise missing data
+
+```{r missing_12}
+summary(soc_care11)
+```
+
+So this quick summary shows the variables with missing data (NA's). There are `r nrow(soc_care11)` observations in the 2011 datset. I have previously removed `meals`, and `iorn_score` variables from this dataset due to quality issues. 
+
+Now, I'll use the `skimr` package to give an alternative (and tidier) way of showing the missing data.
+
+
+Let's plot the missing data by variable
+
+```{r missing_skim, fig.width=12, fig.height=8}
+missing10 <-
+  skim10 %>%
+  dplyr::filter(stat == "missing") %>%
+  dplyr::filter(value != 0) %>%
+  dplyr::mutate(year = "2010") %>%
+  dplyr::mutate(percentage = value / nrow(soc_care10) * 100) %>%
+  dplyr::select(var, year, value, percentage)
+
+missing11 <- 
+  skim11 %>%
+  filter(stat == "missing") %>%
+  mutate(year = "2011") %>%
+  mutate(percentage = value / nrow(soc_care11) * 100) %>%
+  select(var, year, value, percentage)
+
+missing12 <-
+  skim12 %>%
+  filter(stat == "missing") %>%
+  mutate(year = "2012") %>%
+  mutate(percentage = value / nrow(soc_care12) * 100) %>%
+  select(var, year, value, percentage)
+
+missing_data <-
+  full_join(missing10, missing11) %>%
+  full_join(., missing12) %>%
+  arrange(var)
+
+missing_data %>%
+  filter(value != 0) %>%
+  ggplot() +
+  geom_col(aes(var, value)) +
+  geom_text(aes(label=paste0((round(percentage, 1)),"%"), x= var,
+                            y= value), size=4, vjust = -0.5, colour = "black") +
+  theme(axis.text.x = element_text(angle = 45, size = 10, hjust = 1, vjust = 1)) +
+  facet_wrap(~year) +
+  labs(
+    title = "Count and percentage of missing data by variable",
+    subtitle = "Facet by Year of Social Care Survey",
+    x = "Variable",
+    y = "Number of records with missing data"
+  ) +
+  theme_hc()
+rm(list = c("missing10", "missing11", "missing12"))
+```
+
+Only 6 varibles from each dataset appear to be missing in each year. I should be clear here that the percentage values are for the variables i.e. in 2010 36% of records have missing data for `living_arr`- these are not group(year) percentages. 
+
+
+I can also  visualise the missingness across observations. I'll stick with 2011 again
+
+
+```{r missplot_11, fig.width=12, fig.height=8, warning=FALSE, message=FALSE}
+missing_11_plot <- aggr(soc_care11, col=c('navyblue','red'), combined = TRUE, numbers=TRUE,
+                    prop = FALSE, sortVars=TRUE, labels=names(soc_care11),
+                    cex.axis=.7, gap=3, digits = 2, bars = FALSE,
+                    ylab=c("Pattern of missing data"))
+```
+
+
+So here we get 2 useful outputs. First of all a list of variables ordered by the amount of missingness. We also have a plot showing co-occurence of missing variables. If we look first at the bottom row, we see 64021 observations have complete data. 49072 observations are missing the `living_arr` variable only, 17175 observations are missing `living_arr` and `client_grp` variables etc. etc. 
+
+Before we can impute missing values we need to be sure that these data are missing completely at random (MCAR). To help assess this I'm going to visualise the observations with missing values. 
+
+##Visualise geographical distrubution of records with missing data
+
+One of the most obvious potential non-random causes of missing data is that one or more local authorities had worse data completion than others. To identify if this is the case I'm going to isolate all the records with missing data in the 2010 dataset then visulise these records by local authority.
+
+```{r la_missing, fig.width=10}
+library(forcats)
+#Create a df of records with missing data
+missing_soc_care11 <-         
+  soc_care11 %>%
+  filter(!complete.cases(.)) 
+
+#Create a table counting total number records from each LA
+la_missing <- 
+  fct_count(soc_care11$council)
+
+#Create a table of total numebr of records with missing data from each LA
+missing_play <- 
+  fct_count(missing_soc_care11$council)
+
+#Add count of missing records to total records and calculate perecntages then plot
+la_missing %<>%
+  mutate(missing = as.numeric(missing_play$n)) %>%
+  mutate(percentage = (missing / n) * 100) %>%
+  arrange(-percentage) %>%
+  mutate(f = factor(f, f))
+
+ggplot(la_missing) +
+  geom_col(aes(x = f, y = percentage)) +
+  theme(axis.text.x = element_text(angle = 45, size = 10, hjust = 1, vjust = 1)) +
+  theme_hc() +
+  labs(
+    title = "Percentage of records with missing data 2011, by Local Authority", 
+    x = "Local Authority",
+    y = "Proportion of missing data (%)")
+
+rm(list = c("la_missing", "missing_play", "missing_soc_care11"))
+```
+
+Clearly wide variation amounts of missing data. Scottish Borders council didn't return a single record completely! I suspect this may be to do with one or two particular combinations of variables. We know from the 1st plot above approximately 49,000 variables have missing data for living arrangements only - let's check the distribution for this variable only.
+
+##Geographical distribition of missing living arrangments variable
+
+```{r alt_missing_living_arr, fig.width=18, fig.height=16}
+soc_care11 %>%
+  select(council, living_arr) %>%
+  group_by(council, living_arr) %>%
+  tally() %>%
+  mutate(percentage = (n / sum(n)) * 100) %>%
+  ggplot() +
+  geom_col(aes(x = living_arr, y = n)) +
+  geom_text(aes(label=paste0(round(percentage, 1),"%"), x= living_arr,
+                            y= n), size=4, vjust = 1, colour = "light blue") +
+  facet_geo(~council, grid = "scotland_local_authority_grid1", scales = "free_y") +
+  labs(
+    title = "Count of Living Arrangements, Social Care Survey 2011",
+    subtitle = "by Local Authority",
+    x = "Living Arrangements",
+    y = "Count"
+  )
+```
+
+```{r missing_living_arr, fig.width=10}
+soc_care11 %>%
+  select(council, living_arr) %>%
+  group_by(council, living_arr) %>%
+  tally() %>%
+  mutate(percentage = (n / sum(n) * 100)) %>%
+  filter(is.na(living_arr)) %>%
+  arrange(-percentage) %>%
+  ungroup(.) %>%
+  mutate(council = factor(council, council)) %>%
+  ggplot() +
+  geom_col(aes(x = council, y = percentage)) +
+  theme(axis.text.x = element_text(angle = 45, size = 10, hjust = 1, vjust = 1)) +
+  theme_hc() +
+  labs(
+    title = "Percentage of records with missing data for Living Arrangements 2011",
+    subtitle = "by Local Authority",
+    x = "Local Authority",
+    y = "Proportion of missing data (%)")
+
+```
+Again, the top six local authorities with the worst levels of complete data are ranked the same when considering Living Arrangements only - does this describe all their missingness?
+
+We know from the first missing plot that 17175 observations have missing data for a combination of `living arrangements` and `client_grp`. How does this combination compare across LA's?
+
+## Geogrphical - come up with better titles!!
+
+
+```{r missing_comb_4, fig.width=10}
+soc_care11 %>%
+  select(council, living_arr, client_grp) %>%
+  group_by(council, living_arr, client_grp) %>% 
+  tally() %>%
+  group_by(council) %>%
+  mutate(percentage = (n / sum(n) * 100)) %>%
+  group_by(council, living_arr, client_grp) %>%
+  filter(is.na(living_arr) && is.na(client_grp)) %>%
+  arrange(-percentage) %>%
+  ungroup(.) %>%
+  mutate(council = factor(council, council)) %>%
+  ggplot() +
+  geom_col(aes(x = council, y = percentage)) +
+  theme(axis.text.x = element_text(angle = 45, size = 10, hjust = 1, vjust = 1)) +
+  theme_hc() +
+  labs(
+    title = "Percentage of records with missing data for combination 2011",
+    subtitle = "by Local Authority",
+    x = "Local Authority",
+    y = "Proportion of missing data (%)")
+
+```
+
+
+##Impute missing values.
+
+Impute values using `mice` package.
+
+```{r impute_10, eval = FALSE}
+
+imputed_11 <- mice(soc_care11)
+
+```
+
+Save this imputed data  
+
+```{r save_imputed_11, eval = FALSE}
+save(imputed_11, file = "produced_data/model_results/imputed_11.rds")
+```
+
+```{r load}
+load("produced_data/model_results/imputed_11.rds")
+```
+
+Have a look
+```{r look_imp}
+summary(imputed_11)
+```
+
+
+Plot
+
+```{r basic_plot, fig.width=12, fig.height=12}
+plot(imputed_11)
+```
+
+```{r plot_imp, fig.width=12, fig.height=12}
+xy_imputed_11 <- 
+  xyplot(imputed_11, age_grp ~ client_grp + gender + vol_hrs +living_arr + housing_type, pch=18,cex=1)
+```
+
+Plots are not as useful because we are imputing categirical variables only. 
+
+```{r mi_p}
+library(miP)
+mi_categories(imputed_11, "living_arr", sort = TRUE, legend = TRUE)
+```
+
+
+
