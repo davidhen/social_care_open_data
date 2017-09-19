@@ -66,9 +66,8 @@ home_care_hrs
 Now plot, to help ordering the bars I'm going to create a vector with the Local Authorities ordered by those with highest ratios of clients receiving <4 hrs of home care. This vector can then be dropped into the ggplot to arrange the data as needed. 
 
 ```{r order}
-
-ordered <-                   #Create a vector with LAs ordered by <4hrs
-home_care_hrs %>%
+ordered <-                   #Create a vector with LAs ordered by <4hrs 
+  home_care_hrs %>%
   arrange(total_hrs, pct)
 
 ordered_LAs <- ordered$council[1:32]
@@ -83,7 +82,7 @@ hmcare_plot <-
   ggplot(home_care_hrs, 
             aes(
               x = reorder(council, pct), 
-              y = freq,         #I'll use scales::percent below
+              y = freq,   #I'll use scales::percent below
               fill = total_hrs)) + 
   geom_bar(position = "dodge", stat = "identity") +
   labs(x = "Local Authority",
@@ -95,30 +94,11 @@ hmcare_plot <-
   theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   scale_x_discrete(limits = ordered_LAs) +   #using above vector
-  theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
   theme(legend.position = "right") +
   scale_fill_aaas() +
   coord_flip()
 
 hmcare_plot
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
