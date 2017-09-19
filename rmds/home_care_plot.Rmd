@@ -1,0 +1,124 @@
+---
+title: "Home care hours"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/GitHub/soc_care_analysis')
+```
+
+#Intro
+
+Quick plot of home care hours for 2011
+
+##Load data
+
+Load 2011 data - object `soc_care11` was created in "reports/import_and_tidy.html"
+
+```{r load_data}
+load("produced_data/created_objects/soc_care11.rds")
+```
+
+##Load packages
+
+```{r packages, message=FALSE, warning=FALSE}
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(ggthemes)
+library(ggsci)
+```
+
+#Plot
+
+1st of all collapse the total_hrs variable into smaller factor levels.
+
+Currently <1, 1-2, 2-4, 4-6, 6-8, 8-10, 10-15, 15-20, 20-30, 30-40, and over 50.
+
+I'll collapse these levels to <4, 4-10, 10-15, and over 20
+
+```{r fct_collapse}
+soc_care11$total_hrs <- 
+  fct_collapse(soc_care11$total_hrs, 
+               `<4` = c("<1", "1-2", "2-4"),
+               `4-10` = c("4-6", "6-8", "8-10"), #10-15 stays as is
+               over20 = c("20-30", "30-40", "40-50", "over50"))
+```
+
+Now summarise the data
+
+```{r summarise_home_care_hrs}
+
+home_care_hrs <-
+  soc_care11 %>%
+  filter(hc_client == "Yes") %>%     #keep only home care clients
+  group_by(council, total_hrs) %>%
+  summarize(N = n()) %>%
+  mutate(freq = N / sum(N),
+         pct = round((freq*100), 1)) 
+
+home_care_hrs
+  
+```
+
+
+Now plot, to help ordering the bars I'm going to create a vector with the Local Authorities ordered by those with highest ratios of clients receiving <4 hrs of home care. This vector can then be dropped into the ggplot to arrange the data as needed. 
+
+```{r order}
+
+ordered <-                   #Create a vector with LAs ordered by <4hrs
+home_care_hrs %>%
+  arrange(total_hrs, pct)
+
+ordered_LAs <- ordered$council[1:32]
+
+```
+
+
+Finally, time to plot
+
+```{r plot, fig.height=9,fig.width=}
+hmcare_plot <- 
+  ggplot(home_care_hrs, 
+            aes(
+              x = reorder(council, pct), 
+              y = freq,         #I'll use scales::percent below
+              fill = total_hrs)) + 
+  geom_bar(position = "dodge", stat = "identity") +
+  labs(x = "Local Authority",
+       y = "Percent", 
+       fill = "total_hrs",
+       title = "Home Care Hours",
+       subtitle = "2011 Social Care Survey",
+       caption = "based on plot created in Data Visualization for Social Science") +
+  theme_hc() +
+  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
+  scale_x_discrete(limits = ordered_LAs) +   #using above vector
+  theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
+  theme(legend.position = "right") +
+  scale_fill_aaas() +
+  coord_flip()
+
+hmcare_plot
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
