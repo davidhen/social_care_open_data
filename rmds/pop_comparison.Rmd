@@ -68,7 +68,7 @@ Here we have both the `datatable()` and console version of the skim object. The 
 
 Alternative 16/08/2017
 
-```{r sjmisc}
+```{r sjmisc, results="asis"}
 library(sjmisc)
 
 knitr::kable(descr(soc_care10))
@@ -80,7 +80,7 @@ knitr::kable(descr(soc_care10))
 
 I'm going to stick with 2011 data for now. 
 
-```{r skim_coucil11, fig.width=12, fig.height=8}
+```{r skim coucil 11, fig.width=12, fig.height=8}
 skim11 %>%
   filter(var == "council") %>%
   filter(stat == "count") %>%
@@ -113,7 +113,7 @@ How do these absolute numbers reflect the differing populations in each local au
 
 Create `pop_data_combined` a `data_frame` with population sizes of each Local Authority as a total and for over 65s
 
-```{r import_pop_data, warning=FALSE, message=FALSE}
+```{r import_pop_data, warning=FALSE, message=FALSE, results='asis'}
 #Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
 
 #import and tidy raw data
@@ -165,7 +165,7 @@ rm(list = c("pop_data_65plus", "pop_data_total"))
 
 Add a column with total amount of records returned from each council i.e. the total number of indiviudals receiving some form of social care
 
-```{r skim_11_subset}
+```{r skim_11_subset, results='markup'}
 
 #count number of records from each council
 any_care_11 <- fct_count(soc_care11$council)
@@ -188,7 +188,7 @@ rm(any_care_11)
 
 Add a column with total amount of records of over 65s from each local authority
 
-```{r subset_over_65}
+```{r subset_over_65, results='markup'}
 #subset over 65s from 2011 data
 any_care65s <-
   soc_care11 %>%
@@ -222,7 +222,7 @@ pop_data_combined
 
 ##Visualise over 65s
 
-```{r vis_pop, fig.width=12, fig.height=8}
+```{r vis pop, fig.width=12, fig.height=8}
 
 pop_data_combined %>%
   arrange(-over_65s_per_thousand) %>%
@@ -240,7 +240,7 @@ pop_data_combined %>%
 
 ##Highland
 
-```{r check_highland}
+```{r check highland}
 highland <- 
   soc_care11 %>%
   filter(council == "Highland")
@@ -252,7 +252,7 @@ fct_count(highland$age_grp)
 Highland is an outlier because `r round(2344/nrow(highland) * 100, 1)`% of its records have missing data for Age group. It is likely most of this missing data will be over 65s.
 
 
-```{r skim_highland}
+```{r skim highland}
 skim11_highland <- 
   skim(highland) %>%
   filter(stat == "missing") %>%
@@ -266,7 +266,7 @@ Turns out (most likely) the same `r round(2344/nrow(highland) * 100, 1)`% of rec
 
 ##Visualise totals
 
-```{r vis_totals, fig.width=12, fig.height=8}
+```{r vis totals, fig.width=12, fig.height=8}
 pop_data_combined %>%
   arrange(-total_per_thousand) %>%
   mutate(council = factor(council, council)) %>%
