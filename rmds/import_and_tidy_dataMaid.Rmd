@@ -571,10 +571,11 @@ Quick try of this package
 
 ```{r desctable, message=FALSE}
 library(desctable)
-library(pander)
+
 
 soc_care10 %>%
-  desctable 
+  desctable %>%
+  kable
 ```
 
 Awesome!
@@ -582,6 +583,8 @@ Awesome!
 Lets's save these tidied datasets for future reference
 
 ```{r save_objs, eval=FALSE}
+#chunk not run!! Seperate example from original
+
 save(soc_care10, file = "produced_data/created_objects/soc_care10.rds")
 save(soc_care11, file = "produced_data/created_objects/soc_care11.rds")
 save(soc_care12, file = "produced_data/created_objects/soc_care12.rds")

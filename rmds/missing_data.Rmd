@@ -263,10 +263,7 @@ Plot
 plot(imputed_11)
 ```
 
-```{r plot_imp, fig.width=12, fig.height=12}
-xy_imputed_11 <- 
-  xyplot(imputed_11, age_grp ~ client_grp + gender + vol_hrs +living_arr + housing_type, pch=18,cex=1)
-```
+
 
 Plots are not as useful because we are imputing categirical variables only. 
 
