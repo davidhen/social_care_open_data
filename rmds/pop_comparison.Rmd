@@ -113,7 +113,7 @@ How do these absolute numbers reflect the differing populations in each local au
 
 Create `pop_data_combined` a `data_frame` with population sizes of each Local Authority as a total and for over 65s
 
-```{r import_pop_data, warning=FALSE, message=FALSE, results='asis'}
+```{r import_pop_data, warning=FALSE, message=FALSE, results='markdown'}
 #Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
 
 #import and tidy raw data
