@@ -77,7 +77,7 @@ ordered_LAs <- ordered$council[1:32]
 
 Finally, time to plot
 
-```{r plot, fig.height=9,fig.width=}
+```{r plot, fig.height=16,fig.width=10}
 hmcare_plot <- 
   ggplot(home_care_hrs, 
             aes(
@@ -100,5 +100,4 @@ hmcare_plot <-
 
 hmcare_plot
 ```
-
 
