@@ -31,7 +31,8 @@ report <- function(file, n_file = "", open_file = default_open_file,
       toc = TRUE,
       toc_float = TRUE,
       number_sections = TRUE,
-      code_folding = "hide"
+      code_folding = "hide", 
+      keep_md = TRUE
     ),
     output_file = file_name,
     output_dir = report_dir,

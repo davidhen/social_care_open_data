@@ -8,6 +8,7 @@ output:
     toc: yes
     toc_float: yes
     number_sections: yes
+    keep_md: true
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
