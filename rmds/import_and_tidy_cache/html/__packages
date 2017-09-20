@@ -1,4 +1,6 @@
 base
+knitr
+rmarkdown
 dplyr
 ggplot2
 geofacet
@@ -15,7 +17,8 @@ Rcpp
 Amelia
 lattice
 vcd
-miP
-knitr
-rmarkdown
+tidyverse
+tibble
+tidyr
 readr
+purrr

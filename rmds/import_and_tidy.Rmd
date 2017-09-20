@@ -12,7 +12,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_knit$set(root.dir = 'C:/GitHub/soc_care_analysis')
+knitr::opts_knit$set(root.dir = 'H:/GitHub/social_care_open_data')
 ```
 
 #Introduction
@@ -29,8 +29,7 @@ Public release data is for 3 years - 2010, 2011, and 2012 and is avaiable [here]
 ##Packages
 Load required packages
 ```{r packages, message=FALSE, warning=FALSE}
-library(readr)
-library(dplyr)
+library(tidyverse)
 library(forcats)
 ```
 
