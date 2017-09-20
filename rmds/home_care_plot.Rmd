@@ -28,6 +28,7 @@ library(forcats)
 library(ggplot2)
 library(ggthemes)
 library(ggsci)
+library(cowplot)
 ```
 
 #Plot
@@ -52,7 +53,8 @@ Now summarise the data
 
 home_care_hrs <-
   soc_care11 %>%
-  filter(hc_client == "Yes") %>%     #keep only home care clients
+  filter(hc_client == "Yes") %>%      #keep only home care clients
+  filter(age_grp != "18-<65") %>%     #keep only those over 65
   group_by(council, total_hrs) %>%
   summarize(N = n()) %>%
   mutate(freq = N / sum(N),
@@ -68,9 +70,10 @@ Now plot, to help ordering the bars I'm going to create a vector with the Local 
 ```{r order}
 ordered <-                   #Create a vector with LAs ordered by <4hrs 
   home_care_hrs %>%
-  arrange(total_hrs, pct)
+  filter(total_hrs == "<4") %>%
+  arrange(-pct)
 
-ordered_LAs <- ordered$council[1:32]
+ordered_LAs <- ordered$council
 
 ```
 
@@ -100,4 +103,91 @@ hmcare_plot <-
 
 hmcare_plot
 ```
+
+Still a bit noisy, I'll try plotting <4 hrs only
+
+```{r less_than_four_plot, fig.height=10, fig.width=10}
+less_than_four_plot <- 
+  home_care_hrs %>%
+  filter(total_hrs == "<4") %>%
+  ggplot(.,
+         aes(
+              x = reorder(council, -pct), 
+              y = freq  #I'll use scales::percent below
+              )) +   
+  geom_col(fill = "blue4") +
+  labs(x = "",
+       y = "", 
+       title = "Proportion of clients receiving less than 4 hrs home care",
+       subtitle = "2011 Social Care Survey",
+       caption = "based on plot created in Data Visualization for Social Science") +
+  theme_hc() +
+  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
+  theme(legend.position = "none") +
+  coord_flip()
+
+less_than_four_plot
+```
+
+```{r four_to_ten_plot, fig.height=10, fig.width=10}
+four_to_ten_plot <- 
+  home_care_hrs %>%
+  filter(total_hrs == "4-10") %>%
+  ggplot(.,
+         aes(
+              x = reorder(council, -pct), 
+              y = freq  #I'll use scales::percent below
+              )) +   
+  geom_col(fill = "chartreuse4") +
+  labs(x = "",
+       y = "", 
+       title = "Proportion of clients receiving between 4 and 10hrs home care",
+       subtitle = "2011 Social Care Survey",
+       caption = "based on plot created in Data Visualization for Social Science") +
+  theme_hc() +
+  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
+  theme(legend.position = "none") +
+  coord_flip()
+
+four_to_ten_plot
+```
+
+
+Plot side-by-side
+
+```{r cowplot, fig.width=12, fig.height=12}
+plot_grid(less_than_four_plot, four_to_ten_plot, labels = c("Title"))
+```
+
+
+Actually, a facet plot will be much better...
+
+
+```{r facet, fig.height=12, fig.width=12}
+home_care_facet <- 
+  ggplot(home_care_hrs, 
+         aes(
+           x = council,
+           y = freq,   #I'll use scales::percent below
+           fill = total_hrs)) + 
+  geom_col() +
+  geom_hline(yintercept = c(0.2, 0.4, 0.6), alpha = 0.1) +
+  facet_wrap(~total_hrs, ncol = 5) +
+  labs(x = "",
+       y = "", 
+       fill = "Total hours of home care per week",
+       title = "Proportion of clients over 65 receiving hours of home care",
+       subtitle = "Ranked by proportion receiving less than 4 hours of care",
+       caption = "2011 Social Care Survey") +
+  theme_hc() +
+  scale_x_discrete(limits = ordered_LAs) +
+  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
+  theme(legend.position = "none") +
+  scale_fill_lancet() +
+  coord_flip()
+
+home_care_facet
+
+```
+
 

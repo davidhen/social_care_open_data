@@ -4,6 +4,7 @@ forcats
 ggplot2
 ggthemes
 ggsci
+cowplot
 bindrcpp
 knitr
 rmarkdown
