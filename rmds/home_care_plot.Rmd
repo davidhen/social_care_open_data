@@ -5,7 +5,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_knit$set(root.dir = 'H:/GitHub/social_care_open_data')
+knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
 ```
 
 #Intro
@@ -176,13 +176,16 @@ home_care_facet <-
   labs(x = "",
        y = "", 
        fill = "Total hours of home care per week",
-       title = "Proportion of clients over 65 receiving hours of home care",
+       title = "Percentage of Local Authority clients over 65 receiving specified hours of home care",
        subtitle = "Ranked by proportion receiving less than 4 hours of care",
        caption = "2011 Social Care Survey") +
   theme_hc() +
   scale_x_discrete(limits = ordered_LAs) +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
-  theme(legend.position = "none") +
+  theme(legend.position = "bottom") +
+  theme(strip.text.x = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme(axis.text.y = element_text(size = 12, face = "bold")) +
   scale_fill_lancet() +
   coord_flip()
 
