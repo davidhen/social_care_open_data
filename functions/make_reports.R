@@ -6,7 +6,7 @@ library(knitr)
 library(rmarkdown)
 
 # Set the root dir because my rmds live in rmds/ subfolder
-opts_knit$set(root.dir = "H:/GitHub/social_care_open_data")
+opts_knit$set(root.dir = "C:/GitHub/social_care_open_data")
 
 # By default, don't open the report at the end of processing
 default_open_file <- FALSE

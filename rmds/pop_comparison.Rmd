@@ -13,7 +13,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_knit$set(root.dir = 'H:/GitHub/social_care_open_data')
+knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
 ```
 
 #Introduction
