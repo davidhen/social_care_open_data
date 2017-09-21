@@ -1,0 +1,13 @@
+base
+knitr
+rmarkdown
+readr
+dplyr
+tidyr
+purrr
+forcats
+stringr
+ggplot2
+ggthemes
+ggsci
+bindrcpp
