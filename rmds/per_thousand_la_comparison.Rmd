@@ -1,0 +1,363 @@
+---
+title: "Social Care Survey Open Data"
+subtitle: "Simple descriptive analysis"
+output: 
+  rmarkdown::html_document :
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
+```
+
+#Introduction
+
+Plot to compare number of over 65s per 1000 population receiving social care.
+
+Based on 2012 Social Care Survey Open Data. The offical report plots per thousand population receiving home care but for the whole population - let's concentrate on over 65s. 
+
+##Load data
+
+```{r load_data}
+load("produced_data/created_objects/soc_care12.rds")
+
+# This object is the cleaned version of the 2012 social care survey and was created in the file ("reports/01-import_and_tidy.html") or raw rmarkdown can be found ("rmds/import_and_tidy.Rmd")
+```
+
+##Load packages
+
+```{r packages, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(forcats)
+library(stringr)
+library(ggplot2)
+library(ggthemes)
+library(ggsci)
+```
+
+#Overall numbers
+
+1st thing is to look at the overall numbers of records returned for each local autority area.
+
+```{r councils, fig.height=10}
+#summarise overall data first
+total_summary_2012 <-
+  soc_care12 %>%
+  filter(age_grp != "18-<65") %>%  #drop those under 65
+  group_by(council) %>%
+  summarise(N_total = n()) %>%
+  mutate(freq_total = N_total / sum(N_total),
+         pct_total = round((freq_total * 100), 1))
+
+#summarise homecare only data now
+home_care_summary_2012 <-
+  soc_care12 %>%
+  filter(age_grp != "18-<65") %>%  #drop those under 65
+  filter(hc_client == "Yes") %>%   #drop non-home care clients
+  group_by(council) %>%
+  summarise(N_homecare = n()) %>%
+  mutate(freq_homecare = N_homecare / sum(N_homecare),
+         pct_homecare = round((freq_homecare * 100), 1))
+
+#and finally, summarise telecare only data
+telecare_summary_2012 <-
+  soc_care12 %>%
+  filter(age_grp != "18-<65") %>%  #drop those under 65
+  filter(hc_client == "No") %>%   #keep only non-home care clients
+  group_by(council) %>%
+  summarise(N_telecare = n()) %>%
+  mutate(freq_telecare = N_telecare / sum(N_telecare),
+         pct_telecare = round((freq_telecare * 100), 1))
+
+#Join these table together
+
+summary_2012_table <-
+  left_join(total_summary_2012, home_care_summary_2012) %>%
+  left_join(., telecare_summary_2012)
+
+summary_2012_table
+
+rm(list = c("home_care_summary_2012", "total_summary_2012", "telecare_summary_2012"))
+
+```
+
+
+Now we can plot these
+
+```{r total_plot, fig.height=10}
+
+ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
+  geom_bar(fill = "chartreuse4", stat = "identity") +
+  geom_text(aes(label=paste0(pct_total,"%"), x= council,
+                            y= N_total), size=5, hjust = 1, colour = "black") +
+  scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
+  theme(axis.text.y = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Count of Social Care Clients",
+    subtitle = "With percentage of total",
+    x = "",
+    y = "",
+    caption = "2012 Social Care Survey") +
+  coord_flip()
+
+
+```
+
+
+And repeat for **only** home care clients
+
+```{r home_care_plot, fig.height=10}
+
+ggplot(summary_2012_table, aes(reorder(council, -N_homecare), N_homecare)) +
+  geom_bar(fill = "chartreuse4", stat = "identity") +
+  geom_text(aes(label=paste0(pct_homecare,"%"), x= council,
+                            y= N_homecare), size=5, hjust = 1, colour = "black") +
+  scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
+  theme(axis.text.y = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Count of Home Care Clients",
+    subtitle = "With percentage of total",
+    x = "",
+    y = "",
+    caption = "2012 Social Care Survey") +
+  coord_flip()
+
+```
+
+And non-home care clients i.e. telecare or other services only
+
+```{r telecare_plot, fig.height= 10}
+
+ggplot(summary_2012_table, aes(reorder(council, -N_telecare), N_telecare)) +
+  geom_bar(fill = "chartreuse4", stat = "identity") +
+  geom_text(aes(label=paste0(pct_telecare,"%"), x= council,
+                            y= N_telecare), size=5, hjust = 1, colour = "black") +
+  scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
+  theme(axis.text.y = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Count of Telecare and other services Clients",
+    subtitle = "With percentage of total",
+    x = "",
+    y = "",
+    caption = "2012 Social Care Survey") +
+  coord_flip()
+```
+
+#Population Proportions
+
+##Import and tidy census data
+
+To calculate proportions of over 65s getting care in each local authority we need the total number of over 65s in that LA.
+
+For this I am going to use the 2011 Population estimates downloaded from the National Records of Scotland here:-  <https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/2011-census-reconciliation-report/list-of-tables>
+
+This data needs imported and cleaned.
+
+I'm going to create `pop_data_combined`: a `data_frame` with population sizes of each Local Authority as a total and for over 65s
+
+```{r import_pop_data, warning=FALSE, message=FALSE}
+#Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
+
+#import and tidy raw data
+pop_data <- read_csv("raw_data/2011-cen-rec-report-pop-tab1b.csv", skip = 3) %>%
+  slice(1:34) %>%
+  filter(X1 %in% c("Council areas", "SCOTLAND") == FALSE) %>%
+  select(-X3, -X23, -X24) %>%
+  map_at(2:21, as.numeric) %>% #coerce from character to numeric
+  as_data_frame()
+
+names(pop_data) <- str_replace(names(pop_data), "X1", "council") #rename X variables
+names(pop_data) <- str_replace(names(pop_data), "X2", "total")
+
+#tidy data for manipulation
+pop_data_2011 <- 
+  pop_data %>%
+  gather(age_grp, value, 2:21) %>%  
+  arrange(council)
+
+#create table of total population per council
+pop_data_total <-
+  pop_data_2011 %>%
+  filter(age_grp == "total") %>%  
+  select(-age_grp) %>%
+  arrange(council)
+names(pop_data_total) <- str_replace(names(pop_data_total), "value", "pop_total")
+
+#create table of total over65s per council
+pop_data_65plus <-
+  pop_data_2011 %>%
+  filter(age_grp %in% c("65 - 69", "70 - 74", "75 - 79", "80 - 84", "85 - 89", 
+                        "90+") == TRUE) %>%
+  group_by(council) %>%
+  mutate(pop_over_65 = sum(value)) %>%    
+  arrange(council) %>%
+  select(council, pop_over_65) %>%
+  unique(.)
+
+#join tables together
+pop_data_combined_2011 <-
+  full_join(pop_data_total, pop_data_65plus)  
+
+pop_data_combined_2011
+
+rm(list = c("pop_data_65plus", "pop_data_total", "pop_data"))
+```
+
+##Join to social care data
+
+Ok, now to join together the population and social care summaries. 
+
+```{r join_pop_and_summary}
+summary_2012_table <-
+  left_join(pop_data_combined_2011, summary_2012_table)
+
+#refactorise council
+summary_2012_table$council <- as.factor(summary_2012_table$council)
+
+#drop the total population column - we don't need it and it could get confusing
+
+summary_2012_table <- select(summary_2012_table, -pop_total)
+
+summary_2012_table
+```
+
+##Calculate proportions per population
+
+Finally, I'm going to calculate the per thousand proportions.
+
+```{r per_thousands}
+per_thousand_table <-
+  summary_2012_table %>%
+  mutate(any_care_per_thousand = (round((N_total / pop_over_65) * 1000, 1)),  
+         homecare_per_thousand = (round((N_homecare / pop_over_65) * 1000, 1)),
+         telecare_per_thousand = (round((N_telecare / pop_over_65) * 1000, 1))) %>%
+  select(council, any_care_per_thousand, homecare_per_thousand, telecare_per_thousand)
+per_thousand_table
+```
+
+##Save objects
+
+I'm going to save the objects created so far.
+
+```{r save, eval=FALSE}
+save(summary_2012_table, file = "produced_data/created_objects/summary_2012_table.rds")
+save(pop_data_2011, file = "produced_data/created_objects/pop_data_2011.rds")
+save(pop_data_combined_2011, file = "produced_data/created_objects/pop_data_combined_2011.rds")
+save(per_thousand_table, file = "produced_data/created_objects/per_thousand_table.rds")
+```
+
+#Plots
+
+##Any social care
+
+Finally! Let's take a look
+
+```{r any_care_plot, fig.height=10}
+ggplot(per_thousand_table, 
+       aes(x = reorder(council, -any_care_per_thousand), 
+           y = any_care_per_thousand)) +
+  geom_col(fill = "chartreuse4") +
+  theme(axis.text.y = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Proportion of over65 receiving any form of social care",
+    subtitle = "by Local Authority",
+    x = "",
+    y = "",
+    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate") +
+  coord_flip()
+```
+
+Just to check that missing data isn't accounting for the variation....
+
+
+```{r count_missing}
+missing <- 
+  soc_care12 %>%
+  group_by(council, age_grp) %>%
+  tally() %>%
+  filter(is.na(age_grp))
+missing
+```
+
+
+So with the exception of Highland, no area has a significant amount of missing data to majorly skew results. 
+
+I'm going to remove Highland fromt the overall plot. It is likely a lot of their missing data is for over 65s. 
+
+```{r any_care_plot_no_highland, fig.height=10}
+per_thousand_table %>%
+  filter(council != "Highland") %>%
+  ggplot(., 
+       aes(x = reorder(council, -any_care_per_thousand), 
+           y = any_care_per_thousand)) +
+  geom_col(fill = "chartreuse4") +
+  theme(axis.text.y = element_text(size = 14, face = "bold")) +
+  theme(axis.text.x = element_text(size = 14, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Number of over65s per thousand receiving any form of social care",
+    subtitle = "by Local Authority",
+    x = "",
+    y = "Number per thousand over 65s",
+    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate
+    Highland council removed due to large amount of missing data") +
+  coord_flip()
+```
+
+## Home care only
+
+```{r home_care_only_plot, fig.height=10}
+per_thousand_table %>%
+  filter(council != "Highland") %>%
+  ggplot(., 
+       aes(x = reorder(council, -homecare_per_thousand), 
+           y = homecare_per_thousand)) +
+  geom_col(fill = "chartreuse4") +
+  theme(axis.text.y = element_text(size = 14, face = "bold")) +
+  theme(axis.text.x = element_text(size = 14, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Number of over65s per thousand receiving home care",
+    subtitle = "by Local Authority",
+    x = "",
+    y = "Number per thousand over 65s",
+    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate
+    Highland council removed due to large amount of missing data") +
+  coord_flip()
+```
+
+##Telecare only
+
+```{r telecare_only_plot, fig.height=10}
+per_thousand_table %>%
+  filter(council != "Highland") %>%
+  ggplot(., 
+       aes(x = reorder(council, -telecare_per_thousand), 
+           y = telecare_per_thousand)) +
+  geom_col(fill = "chartreuse4") +
+  theme(axis.text.y = element_text(size = 14, face = "bold")) +
+  theme(axis.text.x = element_text(size = 14, face = "bold")) +
+  theme_hc() +
+  labs(
+    title = "Number of over65s per thousand receiving telecare or other services only",
+    subtitle = "by Local Authority",
+    x = "",
+    y = "Number per thousand over 65s",
+    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate
+    Highland council removed due to large amount of missing data") +
+  coord_flip()
+```
+
+

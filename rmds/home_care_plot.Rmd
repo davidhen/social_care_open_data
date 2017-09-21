@@ -10,14 +10,14 @@ knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
 
 #Intro
 
-Quick plot of home care hours for 2011
+Quick plot of home care hours for 2012
 
 ##Load data
 
 Load 2011 data - object `soc_care11` was created in "reports/import_and_tidy.html"
 
 ```{r load_data}
-load("produced_data/created_objects/soc_care11.rds")
+load("produced_data/created_objects/soc_care12.rds")
 ```
 
 ##Load packages
@@ -40,8 +40,8 @@ Currently <1, 1-2, 2-4, 4-6, 6-8, 8-10, 10-15, 15-20, 20-30, 30-40, and over 50.
 I'll collapse these levels to <4, 4-10, 10-15, and over 20
 
 ```{r fct_collapse}
-soc_care11$total_hrs <- 
-  fct_collapse(soc_care11$total_hrs, 
+soc_care12$total_hrs <- 
+  fct_collapse(soc_care12$total_hrs, 
                `<4` = c("<1", "1-2", "2-4"),
                `4-10` = c("4-6", "6-8", "8-10"), #10-15 stays as is
                over20 = c("20-30", "30-40", "40-50", "over50"))
@@ -52,7 +52,7 @@ Now summarise the data
 ```{r summarise_home_care_hrs}
 
 home_care_hrs <-
-  soc_care11 %>%
+  soc_care12 %>%
   filter(hc_client == "Yes") %>%      #keep only home care clients
   filter(age_grp != "18-<65") %>%     #keep only those over 65
   group_by(council, total_hrs) %>%
@@ -92,8 +92,7 @@ hmcare_plot <-
        y = "Percent", 
        fill = "total_hrs",
        title = "Home Care Hours",
-       subtitle = "2011 Social Care Survey",
-       caption = "based on plot created in Data Visualization for Social Science") +
+       subtitle = "2012 Social Care Survey") +
   theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   scale_x_discrete(limits = ordered_LAs) +   #using above vector
@@ -119,8 +118,7 @@ less_than_four_plot <-
   labs(x = "",
        y = "", 
        title = "Proportion of clients receiving less than 4 hrs home care",
-       subtitle = "2011 Social Care Survey",
-       caption = "based on plot created in Data Visualization for Social Science") +
+       subtitle = "2012 Social Care Survey") +
   theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   theme(legend.position = "none") +
@@ -142,8 +140,7 @@ four_to_ten_plot <-
   labs(x = "",
        y = "", 
        title = "Proportion of clients receiving between 4 and 10hrs home care",
-       subtitle = "2011 Social Care Survey",
-       caption = "based on plot created in Data Visualization for Social Science") +
+       subtitle = "2012 Social Care Survey") +
   theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   theme(legend.position = "none") +
@@ -176,9 +173,9 @@ home_care_facet <-
   labs(x = "",
        y = "", 
        fill = "Total hours of home care per week",
-       title = "Percentage of Local Authority clients over 65 receiving specified hours of home care",
+       title = "Figure 2. Percentage of Local Authority clients over 65 receiving specified hours of home care", #Figure 2 for UBDC blog only!
        subtitle = "Ranked by proportion receiving less than 4 hours of care",
-       caption = "2011 Social Care Survey") +
+       caption = "2012 Social Care Survey") +
   theme_hc() +
   scale_x_discrete(limits = ordered_LAs) +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
