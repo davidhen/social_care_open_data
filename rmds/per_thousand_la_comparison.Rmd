@@ -8,7 +8,7 @@ output: rmarkdown::html_document
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
 knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
-Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21")
+Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21") #For font recognition
 ```
 
 

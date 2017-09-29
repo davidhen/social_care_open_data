@@ -6,6 +6,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
 knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
+Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21") #For font recognition
 ```
 
 #Intro
@@ -29,6 +30,7 @@ library(ggplot2)
 library(ggthemes)
 library(ggsci)
 library(cowplot)
+library(extrafont)
 ```
 
 #Plot
@@ -55,6 +57,7 @@ home_care_hrs <-
   soc_care12 %>%
   filter(hc_client == "Yes") %>%      #keep only home care clients
   filter(age_grp != "18-<65") %>%     #keep only those over 65
+  filter(council != "Highland") %>%   #remove highland due to missing data
   group_by(council, total_hrs) %>%
   summarize(N = n()) %>%
   mutate(freq = N / sum(N),
@@ -160,7 +163,7 @@ plot_grid(less_than_four_plot, four_to_ten_plot, labels = c("Title"))
 Actually, a facet plot will be much better...
 
 
-```{r facet, fig.height=12, fig.width=12}
+```{r facet, fig.height=10, fig.width=10}
 home_care_facet <- 
   ggplot(home_care_hrs, 
          aes(
@@ -170,19 +173,22 @@ home_care_facet <-
   geom_col() +
   geom_hline(yintercept = c(0.2, 0.4, 0.6), alpha = 0.1) +
   facet_wrap(~total_hrs, ncol = 5) +
+  scale_x_discrete(limits = ordered_LAs) +
+  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   labs(x = "",
        y = "", 
        fill = "Total hours of home care per week",
        title = "Figure 2. Percentage of Local Authority clients over 65 receiving specified hours of home care", #Figure 2 for UBDC blog only!
        subtitle = "Ranked by proportion receiving less than 4 hours of care",
-       caption = "2012 Social Care Survey") +
-  theme_hc() +
-  scale_x_discrete(limits = ordered_LAs) +
-  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
-  theme(legend.position = "bottom") +
-  theme(strip.text.x = element_text(size = 12, face = "bold")) +
-  theme(axis.text.x = element_text(size = 12, face = "bold")) +
-  theme(axis.text.y = element_text(size = 12, face = "bold")) +
+       caption = "2012 Social Care Survey, Highland council removed due large amount of missing data") +
+  theme_minimal(base_size = 12, base_family = "Roboto") +
+  theme(legend.position = "bottom",
+        plot.subtitle = element_text(color="#666666"),
+        plot.title = element_text(family="Roboto Condensed", face = "bold"),
+        plot.caption = element_text(color="#AAAAAA", size=10),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10, face = "bold"),
+        strip.text.x = element_text(size = 12, face = "bold")) +
   scale_fill_lancet() +
   coord_flip()
 
@@ -190,4 +196,9 @@ home_care_facet
 
 ```
 
+Save for UBDC blog
+
+```{r save_plot, eval = FALSE}
+ggsave("plots/homecare_facet.png", home_care_facet, width=10, height=10)
+```
 
