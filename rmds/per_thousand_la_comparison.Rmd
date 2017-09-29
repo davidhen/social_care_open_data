@@ -8,7 +8,10 @@ output: rmarkdown::html_document
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
 knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
+Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21")
 ```
+
+
 
 #Introduction
 
@@ -35,7 +38,7 @@ library(forcats)
 library(stringr)
 library(ggplot2)
 library(ggthemes)
-library(ggsci)
+library(extrafont)
 ```
 
 #Overall numbers
@@ -317,25 +320,38 @@ per_thousand_table %>%
 
 ## Home care only
 
-```{r home_care_only_plot, fig.height=10}
-per_thousand_table %>%
+```{r home_care_only_plot, fig.height=8, fig.width=8}
+homecare_plot<- 
+  per_thousand_table %>%
   filter(council != "Highland") %>%
   ggplot(., 
        aes(x = reorder(council, -homecare_per_thousand), 
            y = homecare_per_thousand)) +
   geom_col(fill = "chartreuse4") +
-  theme(axis.text.y = element_text(size = 14, face = "bold")) +
-  theme(axis.text.x = element_text(size = 14, face = "bold")) +
-  theme_hc() +
   labs(
-    title = "Number of over65s per thousand receiving home care",
+    title = "Figure 1: Number of over65s per thousand receiving home care",
     subtitle = "by Local Authority",
     x = "",
     y = "Number per thousand over 65s",
     caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate
     Highland council removed due to large amount of missing data") +
+  theme_minimal(base_size=9, base_family="Roboto") +
+    theme(plot.subtitle = element_text(color="#666666"),
+          plot.title = element_text(family="Roboto Condensed", face = "bold"),
+          plot.caption = element_text(color="#AAAAAA", size=8),
+          axis.text.y = element_text(size = 8),
+          axis.text.x = element_text(size = 10, face = "bold")) +
   coord_flip()
+homecare_plot
 ```
+
+Save this plot (for UBDC blog!)
+
+```{r save_plot,eval=FALSE}
+ggsave("plots/over65s_homecare.png", homecare_plot, width=8, height=8)
+```
+
+
 
 ##Telecare only
 
