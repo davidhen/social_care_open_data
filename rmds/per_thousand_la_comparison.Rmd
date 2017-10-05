@@ -93,11 +93,11 @@ Now we can plot these
 ```{r total_plot, fig.height=8, fig.width = 10, warning = FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
-  geom_point(color = "#EE0000FF", size = 3) +
-  geom_text(aes(label=paste0(pct_total,"%")), size = 2.5, hjust = -0.3, vjust = -0.2) +
+  geom_point(color = "#5F559BFF", size = 3) +
+  geom_text(aes(label=paste0(pct_total,"%")), size = 3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.x = element_text(size = 12, face = "bold"),
-        text = element_text(family = "Roboto"),
+  theme(axis.text.x = element_text(size = 12),
+        text = element_text(family = "Roboto", size = 9),
         plot.title = element_text(family = "Roboto Condensed", size = 18,
                                   hjust = 0, face = "bold"),
         plot.subtitle = element_text(color = "#666666"),
@@ -115,21 +115,24 @@ ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
 
 And repeat for **only** home care clients
 
-```{r home_care_plot, fig.height=10}
+```{r home_care_plot, fig.height=9, fig.width=10, warning=FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_homecare), N_homecare)) +
-  geom_bar(fill = "chartreuse4", stat = "identity") +
-  geom_text(aes(label=paste0(pct_homecare,"%"), x= council,
-                            y= N_homecare), size=5, hjust = 1, colour = "black") +
+  geom_point(color = "#EE0000FF", size = 3) +
+  geom_text(aes(label=paste0(pct_homecare,"%")), size=3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.y = element_text(size = 12, face = "bold")) +
-  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12),
+        text = element_text(family = "Roboto", size = 9),
+        plot.title = element_text(family = "Roboto Condensed", size = 18,
+                                  hjust = 0, face = "bold"),
+        plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10)) +
   theme_hc() +
   labs(
     title = "Count of Home Care Clients",
     subtitle = "With percentage of total",
     x = "",
-    y = "",
+    y = "Number of home care clients",
     caption = "2012 Social Care Survey") +
   coord_flip()
 
@@ -137,15 +140,18 @@ ggplot(summary_2012_table, aes(reorder(council, -N_homecare), N_homecare)) +
 
 And non-home care clients i.e. telecare or other services only
 
-```{r telecare_plot, fig.height= 10}
+```{r telecare_plot, fig.height= 8, fig.width=10, warning=FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_telecare), N_telecare)) +
-  geom_bar(fill = "chartreuse4", stat = "identity") +
-  geom_text(aes(label=paste0(pct_telecare,"%"), x= council,
-                            y= N_telecare), size=5, hjust = 1, colour = "black") +
+  geom_point(color = "#008280FF", size = 3) +
+  geom_text(aes(label=paste0(pct_telecare,"%")), size=3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.y = element_text(size = 12, face = "bold")) +
-  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  theme(axis.text.x = element_text(size = 12),
+        text = element_text(family = "Roboto", size = 9),
+        plot.title = element_text(family = "Roboto Condensed", size = 18,
+                                  hjust = 0, face = "bold"),
+        plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10)) +
   theme_hc() +
   labs(
     title = "Count of Telecare and other services Clients",
@@ -265,19 +271,23 @@ save(per_thousand_table, file = "produced_data/created_objects/per_thousand_tabl
 
 Finally! Let's take a look
 
-```{r any_care_plot, fig.height=10}
+```{r any_care_plot, fig.height=8, fig.width=10, warning=FALSE}
 ggplot(per_thousand_table, 
        aes(x = reorder(council, -any_care_per_thousand), 
            y = any_care_per_thousand)) +
-  geom_col(fill = "chartreuse4") +
-  theme(axis.text.y = element_text(size = 12, face = "bold")) +
-  theme(axis.text.x = element_text(size = 12, face = "bold")) +
+  geom_point(color = "#631879FF", size = 3) +
+  theme(axis.text.x = element_text(size = 12),
+        text = element_text(family = "Roboto", size = 9),
+        plot.title = element_text(family = "Roboto Condensed", size = 18,
+                                  hjust = 0, face = "bold"),
+        plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10)) +
   theme_hc() +
   labs(
     title = "Proportion of over65 receiving any form of social care",
     subtitle = "by Local Authority",
     x = "",
-    y = "",
+    y = "Number per thousand population 65+",
     caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate") +
   coord_flip()
 ```
@@ -299,23 +309,26 @@ So with the exception of Highland, no area has a significant amount of missing d
 
 I'm going to remove Highland fromt the overall plot. It is likely a lot of their missing data is for over 65s. 
 
-```{r any_care_plot_no_highland, fig.height=10}
+```{r any_care_plot_no_highland, fig.height=8, fig.width=10, warning=FALSE}
 per_thousand_table %>%
   filter(council != "Highland") %>%
   ggplot(., 
        aes(x = reorder(council, -any_care_per_thousand), 
            y = any_care_per_thousand)) +
-  geom_col(fill = "chartreuse4") +
-  theme(axis.text.y = element_text(size = 14, face = "bold")) +
-  theme(axis.text.x = element_text(size = 14, face = "bold")) +
+  geom_point(color = "#631879FF", size = 3) +
+  theme(axis.text.x = element_text(size = 12),
+        text = element_text(family = "Roboto", size = 9),
+        plot.title = element_text(family = "Roboto Condensed", size = 18,
+                                  hjust = 0, face = "bold"),
+        plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10)) +
   theme_hc() +
   labs(
-    title = "Number of over65s per thousand receiving any form of social care",
+    title = "Proportion of over65 receiving any form of social care",
     subtitle = "by Local Authority",
     x = "",
-    y = "Number per thousand over 65s",
-    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate
-    Highland council removed due to large amount of missing data") +
+    y = "Number per thousand population 65+",
+    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate") +
   coord_flip()
 ```
 

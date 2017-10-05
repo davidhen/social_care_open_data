@@ -13,3 +13,4 @@ readr
 tidyr
 purrr
 stringr
+scales
