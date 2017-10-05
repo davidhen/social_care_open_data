@@ -202,3 +202,52 @@ Save for UBDC blog
 ggsave("plots/homecare_facet.png", home_care_facet, width=10, height=10)
 ```
 
+Try a clevland dotplot
+
+```{r clevland, fig.height = 10, fig.width=10}
+home_care_facet_clevland <- 
+  ggplot(home_care_hrs, 
+         aes(
+           x = council,
+           y = freq,   #I'll use scales::percent below
+           color = total_hrs)) + 
+  geom_point(size = 3) +
+  facet_wrap(~total_hrs, ncol = 5) +
+  scale_x_discrete(limits = ordered_LAs) +
+  scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
+  labs(x = "",
+       y = "", 
+       fill = "Total hours of home care per week",
+       title = "Figure 2. Percentage of Local Authority clients over 65 receiving specified hours of home care", #Figure 2 for UBDC blog only!
+       subtitle = "Ranked by proportion receiving less than 4 hours of care",
+       caption = "2012 Social Care Survey, Highland council removed due large amount of missing data")  +
+  coord_flip() +
+  theme(text = element_text(size = 12, family = "Roboto"),
+        legend.position = "none",
+        plot.subtitle = element_text(color="#666666", size = 10),
+        plot.title = element_text(family="Roboto Condensed", face = "bold", hjust = 0),
+        plot.caption = element_text(color="#AAAAAA", size=10),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10, face = "bold"),
+        strip.text.x = element_text(size = 12, face = "bold")) +
+  scale_color_lancet()
+
+home_care_facet_clevland
+````
+
+
+```{r}
+ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, width=10, height=10)
+```
+
+
+
+
+
+
+
+   +
+  coord_flip()
+
+home_care_facet
+```

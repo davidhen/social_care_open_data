@@ -375,4 +375,36 @@ per_thousand_table %>%
   coord_flip()
 ```
 
+#Alternative UBDC blog plot
 
+Going to try a Clevland dotplot.
+
+```{r clevland, fig.height=8, fig.width=8}
+library(cowplot)  #for theme
+homecare_plot_clevland<- 
+  per_thousand_table %>%
+  filter(council != "Highland") %>%
+  ggplot(., 
+       aes(x = reorder(council, -homecare_per_thousand), 
+           y = homecare_per_thousand)) +
+  geom_point(size = 3, color = "chartreuse4") +
+  labs(
+    title = "Figure 1: Number of over65s per thousand receiving home care",
+    subtitle = "by Local Authority",
+    x = "",
+    y = "Number per thousand over 65s",
+    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate
+    Highland council removed due to large amount of missing data") +
+    theme(text = element_text(size = 9, family = "Roboto"),
+          plot.subtitle = element_text(color="#666666"),
+          plot.title = element_text(family="Roboto Condensed", face = "bold", hjust=0),
+          plot.caption = element_text(color="#AAAAAA", size=8),
+          axis.text.y = element_text(size = 8),
+          axis.text.x = element_text(size = 10, face = "bold")) +
+  coord_flip()
+homecare_plot_clevland
+```
+
+```{r save_plot,eval=FALSE}
+ggsave("plots/over65s_homecare_clevland.png", homecare_plot_clevland, width=8, height=8)
+```

@@ -3,7 +3,8 @@ title: "Social Care Survey Open Data"
 subtitle: "Import and Tidy - dataMaid example"
 output: 
   rmarkdown::html_document :
-    theme: readable
+    theme: spacelab
+    df_print: paged
     code_folding: hide
     toc: yes
     toc_float: yes

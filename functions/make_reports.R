@@ -27,7 +27,8 @@ report <- function(file, n_file = "", open_file = default_open_file,
   render(
     input = file,
     output_format = rmarkdown::html_document(
-      theme = "readable",
+      theme = "spacelab",
+      df_print = "paged",
       toc = TRUE,
       toc_float = TRUE,
       number_sections = TRUE,
