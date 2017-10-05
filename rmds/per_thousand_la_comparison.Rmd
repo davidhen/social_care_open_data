@@ -38,6 +38,7 @@ library(stringr)
 library(ggplot2)
 library(ggthemes)
 library(extrafont)
+loadfonts()
 ```
 
 #Overall numbers
@@ -89,25 +90,26 @@ rm(list = c("home_care_summary_2012", "total_summary_2012", "telecare_summary_20
 
 Now we can plot these
 
-```{r total_plot, fig.height=10}
+```{r total_plot, fig.height=8, fig.width = 10, warning = FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
-  geom_bar(fill = "chartreuse4", stat = "identity") +
-  geom_text(aes(label=paste0(pct_total,"%"), x= council,
-                            y= N_total), size=5, hjust = 1, colour = "black") +
+  geom_point(color = "#EE0000FF", size = 3) +
+  geom_text(aes(label=paste0(pct_total,"%")), size = 2.5, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.y = element_text(size = 12, face = "bold")) +
-  theme(axis.text.x = element_text(size = 12, face = "bold")) +
-  theme_hc() +
+  theme(axis.text.x = element_text(size = 12, face = "bold"),
+        text = element_text(family = "Roboto"),
+        plot.title = element_text(family = "Roboto Condensed", size = 18,
+                                  hjust = 0, face = "bold"),
+        plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10)) +
   labs(
     title = "Count of Social Care Clients",
     subtitle = "With percentage of total",
     x = "",
-    y = "",
+    y = "Number of Clients",
     caption = "2012 Social Care Survey") +
-  coord_flip()
-
-
+  coord_flip() +
+  theme_hc()
 ```
 
 
