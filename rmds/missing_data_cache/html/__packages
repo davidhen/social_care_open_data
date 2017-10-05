@@ -1,8 +1,14 @@
 base
 knitr
 rmarkdown
-dplyr
+readr
+tidyverse
 ggplot2
+tibble
+tidyr
+purrr
+dplyr
+forcats
 geofacet
 ggthemes
 mice
@@ -10,4 +16,8 @@ colorspace
 data.table
 VIM
 bindrcpp
-forcats
+skimr
+stringr
+magrittr
+DT
+sjmisc

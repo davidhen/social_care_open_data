@@ -1,14 +1,6 @@
 ---
 title: "Social Care Survey Open Data"
 subtitle: "Import and Tidy - dataMaid example"
-output: 
-  rmarkdown::html_document :
-    theme: spacelab
-    df_print: paged
-    code_folding: hide
-    toc: yes
-    toc_float: yes
-    number_sections: yes
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

@@ -264,12 +264,5 @@ plot(imputed_11)
 
 
 
-Plots are not as useful because we are imputing categirical variables only. 
-
-```{r mi_p}
-library(miP)
-mi_categories(imputed_11, "living_arr", sort = TRUE, legend = TRUE)
-```
-
 
 
