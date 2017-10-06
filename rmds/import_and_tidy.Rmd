@@ -42,9 +42,9 @@ Let's start by looking at each set of data
 ##Glimpse
 
 ```{r glimpse10}
-glimpse(soc_care10)
-glimpse(soc_care11)
-glimpse(soc_care12)
+soc_care10
+soc_care11
+soc_care12
 ```
 
 We can see in 2010 there are `r nrow(soc_care10)` observations of `r ncol(soc_care10)` variables. 2011 has `r nrow(soc_care11)` observations of `r ncol(soc_care11)` variables and 2010 has `r nrow(soc_care12)` observations of `r ncol(soc_care12)` variables. 

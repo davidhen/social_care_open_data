@@ -27,9 +27,11 @@ library(dplyr)
 library(forcats)
 library(ggplot2)
 library(ggthemes)
-library(ggsci)
-library(cowplot)
 library(extrafont)
+theme_set(theme_tufte(base_size = 18))
+ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165AF",
+                  "#BCD032","#866BAC", "#545A5D",  "#7A8082", "#E2D988", "#628DB7",
+                  "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
 ```
 
 #Plot
@@ -79,7 +81,6 @@ ordered_LAs <- ordered$council
 
 ```
 
-
 Finally, time to plot
 
 ```{r plot, fig.height=16,fig.width=10}
@@ -95,17 +96,31 @@ hmcare_plot <-
        fill = "total_hrs",
        title = "Home Care Hours",
        subtitle = "2012 Social Care Survey") +
-  theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   scale_x_discrete(limits = ordered_LAs) +   #using above vector
   theme(legend.position = "right") +
-  scale_fill_aaas() +
+  scale_fill_manual(values = ubdc_palette) +
   coord_flip()
 
 hmcare_plot
 ```
 
+
 Still a bit noisy, I'll try plotting <4 hrs only
+
+```{r less_4_point, fig.width=8, fig.height=7}
+home_care_hrs %>% 
+  filter(total_hrs == "<4") %>% 
+  ggplot(aes(reorder(council, -freq), freq)) +
+  geom_point(colour = ubdc_palette[5], size = 3) +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent) +
+  theme(panel.grid.major = element_line(colour = ubdc_palette[18])) +
+  labs(x = "",
+       y = "", 
+       title = "Proportion of clients receiving less than \n4 hrs home care",
+       subtitle = "2012 Social Care Survey") 
+```
 
 ```{r less_than_four_plot, fig.height=10, fig.width=10}
 less_than_four_plot <- 

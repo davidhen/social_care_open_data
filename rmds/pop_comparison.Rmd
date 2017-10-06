@@ -1,14 +1,6 @@
 ---
 title: "Social Care Survey Open Data"
 subtitle: "Simple descriptive analysis"
-output: 
-  rmarkdown::html_document :
-    theme: readable
-    code_folding: hide
-    toc: yes
-    toc_float: yes
-    number_sections: yes
-    keep_md: true
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -33,7 +25,6 @@ load("produced_data/created_objects/soc_care12.rds")
 ##Load packages
 And required packages
 ```{r package, message=FALSE, warning=FALSE}
-library(skimr)
 library(dplyr)
 library(ggplot2)
 library(ggthemes)
@@ -43,62 +34,54 @@ library(stringr)
 library(tidyr)
 library(magrittr)
 library(forcats)
-library(DT)
+library(extrafont)
+theme_set(theme_tufte(base_size = 18))
+ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165AF",
+                  "#BCD032","#866BAC", "#545A5D",  "#7A8082", "#E2D988", "#628DB7",
+                  "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
 ```
 
 
 #Examine data
 
-##Summaries using 'skimr`
-
-1st thing is to create skim objects for each year. I've printed the 2011 versions here as an example
+##Summaries 
 
 ```{r skim_10}
-skim10 <- skim(soc_care10)
-skim11 <- skim(soc_care11)
-skim12 <- skim(soc_care12)
-
-datatable(skim11)
-skim11
+soc_care10
+soc_care11
+soc_care12
 ```
 
-Here we have both the `datatable()` and console version of the skim object. The former is a tidy object that can be manipulated any way we want - the latter is a handy summary of the dataset - I particularly like the counts of complete and missing cases.
-
-###sjmisc
-
-Alternative 16/08/2017
-
-```{r sjmisc, results="asis"}
-library(sjmisc)
-
-knitr::kable(descr(soc_care10))
-```
 
 ##Councils
 
 1st thing I want to visualise is the absolute number of records returned for each council and what percentage of the total this is. 
 
-I'm going to stick with 2011 data for now. 
+I'm going to stick with 2011 data for now. Need to pre-summarise the data...
 
-```{r skim coucil 11, fig.width=12, fig.height=8}
-skim11 %>%
-  filter(var == "council") %>%
-  filter(stat == "count") %>%
-  filter(!is.na(level)) %>%
-  mutate(percentage = (value/sum(value)* 100)) %>%
-  arrange(-value) %>%
-  mutate(level = factor(level, level)) %>%
-  select(level, value, percentage) %>%
-  ggplot() +
-  geom_col(aes(x = level, y = value)) + 
-    geom_text(aes(label=paste0(round(percentage, 1),"%"), x= level,
-                            y= value), size=4, vjust = -0.5, colour = "black") +
-    theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
-    theme_hc() +
+```{r summ}
+sc_11_summary <-
+  soc_care11 %>% 
+  group_by(council) %>% 
+  summarise(any_care = n()) %>% 
+  mutate(freq = any_care/sum(any_care),
+         pct = round(freq * 100,1))
+sc_11_summary
+```
+
+...and then plot it
+
+```{r plot_counc_count, fig.width=12, fig.height=8}
+ggplot(sc_11_summary, aes(reorder(council, -any_care), any_care)) +
+  geom_point(size = 3, color = ubdc_palette[5]) +
+  geom_text(aes(label = paste0(pct,"%"), hjust = -0.2, vjust = -0.2)) +
+  coord_flip() +
+  theme(panel.grid.major.y = element_line(ubdc_palette[18]),
+        panel.grid.major.x = element_line(ubdc_palette[18])) +
   labs(
-    title = "Number of records returned for Social Care Survey 2011, with percentage of total",
+    title = "Number of records returned for Social Care Survey 2011,\nwith percentage of total",
     subtitle = "by Local Authority", 
-    x = "Local Authority",
+    x = "",
     y = "Number of records")
 ```
 
@@ -113,7 +96,7 @@ How do these absolute numbers reflect the differing populations in each local au
 
 Create `pop_data_combined` a `data_frame` with population sizes of each Local Authority as a total and for over 65s
 
-```{r import_pop_data, warning=FALSE, message=FALSE, results='markdown'}
+```{r import_pop_data, warning=FALSE, message=FALSE}
 #Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
 
 #import and tidy raw data
@@ -163,25 +146,13 @@ rm(list = c("pop_data_65plus", "pop_data_total"))
 
 ##Add social care
 
-Add a column with total amount of records returned from each council i.e. the total number of indiviudals receiving some form of social care
+Join to `sc_11_summary` table
 
-```{r skim_11_subset, results='markup'}
-
-#count number of records from each council
-any_care_11 <- fct_count(soc_care11$council)
-
-#rename tibble columns
-names(any_care_11) <- 
-  str_replace(names(any_care_11), "n", "any_care_total") %>%
-  str_replace(., "f", "council")
-
-#join this table to pop_data_combined
-pop_data_combined %<>%
-  full_join(., any_care_11)
-
+```{r join}
+pop_data_combined <-
+  left_join(pop_data_combined, sc_11_summary) %>% 
+  select(council, pop_total, pop_over_65, any_care)
 pop_data_combined
-
-rm(any_care_11)
 ```
 
 ##Add social care over 65s
@@ -202,7 +173,7 @@ names(care65s) <-
 
 #and add this to pop_data_combined
 pop_data_combined %<>%
-  full_join(., care65s)
+  left_join(., care65s)
 
 pop_data_combined
 
@@ -214,7 +185,7 @@ rm(care65s)
 ```{r calc_per_thousand}
 #calculate per 1000
 pop_data_combined %<>%
-  mutate(total_per_thousand = (any_care_total / pop_total) * 1000) %>%
+  mutate(total_per_thousand = (any_care / pop_total) * 1000) %>%
   mutate(over_65s_per_thousand = (any_care_over_65s / pop_over_65) * 1000)
 
 pop_data_combined
@@ -223,17 +194,15 @@ pop_data_combined
 ##Visualise over 65s
 
 ```{r vis pop, fig.width=12, fig.height=8}
-
-pop_data_combined %>%
-  arrange(-over_65s_per_thousand) %>%
-  mutate(council = factor(council, council)) %>%
-  ggplot() +
-  geom_col(aes(x = council, y = over_65s_per_thousand)) +
-  theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
-  theme_hc() +
+ggplot(pop_data_combined, 
+       aes(reorder(council, over_65s_per_thousand), over_65s_per_thousand)) +
+  geom_point(color = ubdc_palette[5], size = 3) +
+  coord_flip() +
+  theme(panel.grid.major.x = element_line(colour = ubdc_palette[18]),
+        panel.grid.major.y = element_line(colour = ubdc_palette[18])) +
   labs(
     title = "Number of over 65s per 1000 population receiving any form of social care, 2011",
-    x = "Local Authority area",
+    x = "",
     y = "rate per 1000 population"
   )
 ```
@@ -252,28 +221,15 @@ fct_count(highland$age_grp)
 Highland is an outlier because `r round(2344/nrow(highland) * 100, 1)`% of its records have missing data for Age group. It is likely most of this missing data will be over 65s.
 
 
-```{r skim highland}
-skim11_highland <- 
-  skim(highland) %>%
-  filter(stat == "missing") %>%
-  filter(value != 0)
-
-skim11_highland
-
-```
-
-Turns out (most likely) the same `r round(2344/nrow(highland) * 100, 1)`% of records are also missing data for `client-grp`, `gender`, and `living_arr`.
-
 ##Visualise totals
 
 ```{r vis totals, fig.width=12, fig.height=8}
-pop_data_combined %>%
-  arrange(-total_per_thousand) %>%
-  mutate(council = factor(council, council)) %>%
-  ggplot() +
-  geom_col(aes(x = council, y = total_per_thousand)) +
-  theme(axis.text.x = element_text(angle = 45, size = 12, hjust = 1, vjust = 1)) +
-  theme_hc() +
+ggplot(pop_data_combined, 
+       aes(reorder(council, total_per_thousand), total_per_thousand)) +
+  geom_point(color = ubdc_palette[5], size = 3) +
+  coord_flip() +
+  theme(panel.grid.major.x = element_line(colour = ubdc_palette[16], size = 1),
+        panel.grid.major.y = element_line(colour = ubdc_palette[16], size = 1)) +
   labs(
     title = "Number per 1000 population receiving any form of social care, 2011",
     x = "Local Authority area",
@@ -285,9 +241,6 @@ pop_data_combined %>%
 ```{r save_obs, eval = FALSE}
 save(pop_data, file = "produced_data/created_objects/pop_data.rds")
 save(pop_data_combined, file = "produced_data/created_objects/pop_data_combined.rds")
-save(skim10, file = "produced_data/created_objects/skim10.rds")
-save(skim11, file = "produced_data/created_objects/skim11.rds")
-save(skim12, file= "produced_data/created_objects/skim12.rds")
 save(any_care65s, file = "produced_data/created_objects/any_care65s.rds")
 ```
 
