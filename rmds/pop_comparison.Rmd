@@ -76,8 +76,7 @@ ggplot(sc_11_summary, aes(reorder(council, -any_care), any_care)) +
   geom_point(size = 3, color = ubdc_palette[5]) +
   geom_text(aes(label = paste0(pct,"%"), hjust = -0.2, vjust = -0.2)) +
   coord_flip() +
-  theme(panel.grid.major.y = element_line(ubdc_palette[18]),
-        panel.grid.major.x = element_line(ubdc_palette[18])) +
+  theme(panel.grid.major = element_line(ubdc_palette[18])) +
   labs(
     title = "Number of records returned for Social Care Survey 2011,\nwith percentage of total",
     subtitle = "by Local Authority", 
@@ -198,12 +197,11 @@ ggplot(pop_data_combined,
        aes(reorder(council, over_65s_per_thousand), over_65s_per_thousand)) +
   geom_point(color = ubdc_palette[5], size = 3) +
   coord_flip() +
-  theme(panel.grid.major.x = element_line(colour = ubdc_palette[18]),
-        panel.grid.major.y = element_line(colour = ubdc_palette[18])) +
+  theme(panel.grid.major = element_line(colour = ubdc_palette[18])) +
   labs(
-    title = "Number of over 65s per 1000 population receiving any form of social care, 2011",
+    title = "Standardised rate per 1000 population over 65 \nreceiving any form of social care, 2011",
     x = "",
-    y = "rate per 1000 population"
+    y = "Standardised rate per 1000 population"
   )
 ```
 
@@ -228,12 +226,11 @@ ggplot(pop_data_combined,
        aes(reorder(council, total_per_thousand), total_per_thousand)) +
   geom_point(color = ubdc_palette[5], size = 3) +
   coord_flip() +
-  theme(panel.grid.major.x = element_line(colour = ubdc_palette[16], size = 1),
-        panel.grid.major.y = element_line(colour = ubdc_palette[16], size = 1)) +
+  theme(panel.grid.major = element_line(colour = ubdc_palette[18], size = 1)) +
   labs(
-    title = "Number per 1000 population receiving any form of social care, 2011",
+    title = "Standardised rate per 1000 population receiving any form of social care, 2011",
     x = "Local Authority area",
-    y = "rate per 1000 population"
+    y = "Standardised rate per 1000 population"
   )
 ```
 
