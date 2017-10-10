@@ -21,7 +21,7 @@ report <- function(file, n_file = "", open_file = default_open_file,
   # Make nfiles with always 2 digits
   n_file <- ifelse(as.integer(n_file) < 10, paste0("0", n_file), n_file)
   
-  file_name <- paste0(n_file, "-", base_name, ".html")
+  file_name <- paste0(n_file, "-", base_name, ".md")
   
   ### Render ###
   render(
