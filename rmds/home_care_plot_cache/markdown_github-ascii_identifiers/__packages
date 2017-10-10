@@ -1,9 +1,0 @@
-base
-knitr
-rmarkdown
-dplyr
-forcats
-ggplot2
-ggthemes
-extrafont
-bindrcpp
