@@ -26,7 +26,7 @@ report <- function(file, n_file = "", open_file = default_open_file,
   ### Render ###
   render(
     input = file,
-    output_format = rmarkdown::github_document(),
+    output_format = github_document(),
     output_file = file_name,
     output_dir = report_dir,
     envir = new.env()
