@@ -304,9 +304,7 @@ highland <-
 nrow(highland)
 ```
 
-```
-## [1] 4387
-```
+[1] 4387
 
 ```r
 fct_count(highland$age_grp)

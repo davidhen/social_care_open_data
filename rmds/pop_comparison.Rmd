@@ -3,8 +3,7 @@ title: "Social Care Survey Open Data"
 subtitle: "Simple descriptive analysis"
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, results = "asis")
 knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
 ```
 
