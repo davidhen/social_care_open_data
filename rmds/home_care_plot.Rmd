@@ -115,7 +115,7 @@ home_care_hrs %>%
   geom_point(colour = ubdc_palette[5], size = 3) +
   coord_flip() +
   scale_y_continuous(labels = scales::percent) +
-  theme(panel.grid.major = element_line(colour = ubdc_palette[18])) +
+  theme(panel.grid.major = element_line(colour = "#f2f2f2")) +
   labs(x = "",
        y = "", 
        title = "Proportion of clients receiving less than \n4 hrs home care",
@@ -131,12 +131,11 @@ less_than_four_plot <-
               x = reorder(council, -pct), 
               y = freq  #I'll use scales::percent below
               )) +   
-  geom_col(fill = "blue4") +
+  geom_col(fill = ubdc_palette[1]) +
   labs(x = "",
        y = "", 
        title = "Proportion of clients receiving less than 4 hrs home care",
        subtitle = "2012 Social Care Survey") +
-  theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   theme(legend.position = "none") +
   coord_flip()
@@ -153,12 +152,11 @@ four_to_ten_plot <-
               x = reorder(council, -pct), 
               y = freq  #I'll use scales::percent below
               )) +   
-  geom_col(fill = "chartreuse4") +
+  geom_col(fill = ubdc_palette[4]) +
   labs(x = "",
        y = "", 
        title = "Proportion of clients receiving between 4 and 10hrs home care",
        subtitle = "2012 Social Care Survey") +
-  theme_hc() +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
   theme(legend.position = "none") +
   coord_flip()
@@ -166,12 +164,6 @@ four_to_ten_plot <-
 four_to_ten_plot
 ```
 
-
-Plot side-by-side
-
-```{r cowplot, fig.width=12, fig.height=12}
-plot_grid(less_than_four_plot, four_to_ten_plot, labels = c("Title"))
-```
 
 
 Actually, a facet plot will be much better...
@@ -185,7 +177,6 @@ home_care_facet <-
            y = freq,   #I'll use scales::percent below
            fill = total_hrs)) + 
   geom_col() +
-  geom_hline(yintercept = c(0.2, 0.4, 0.6), alpha = 0.1) +
   facet_wrap(~total_hrs, ncol = 5) +
   scale_x_discrete(limits = ordered_LAs) +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
@@ -202,8 +193,9 @@ home_care_facet <-
         plot.caption = element_text(color="#AAAAAA", size=10),
         axis.text.y = element_text(size = 10),
         axis.text.x = element_text(size = 10, face = "bold"),
-        strip.text.x = element_text(size = 12, face = "bold")) +
-  scale_fill_lancet() +
+        strip.text.x = element_text(size = 12, face = "bold"),
+        panel.grid.major.x = element_line(colour = "#f2f2f2")) +
+  scale_fill_manual(values = ubdc_palette) +
   coord_flip()
 
 home_care_facet
@@ -213,7 +205,7 @@ home_care_facet
 Save for UBDC blog
 
 ```{r save_plot, eval = FALSE}
-ggsave("plots/homecare_facet.png", home_care_facet, width=10, height=10)
+ggplot2::ggsave(home_care_facet, filename = "plots/homecare_facet.png")
 ```
 
 Try a clevland dotplot
@@ -243,8 +235,9 @@ home_care_facet_clevland <-
         plot.caption = element_text(color="#AAAAAA", size=10),
         axis.text.y = element_text(size = 10),
         axis.text.x = element_text(size = 10, face = "bold"),
-        strip.text.x = element_text(size = 12, face = "bold")) +
-  scale_color_lancet()
+        strip.text.x = element_text(size = 12, face = "bold"),
+        panel.grid.major = element_line(color = "#f2f2f2")) +
+  scale_color_manual(values = ubdc_palette)
 
 home_care_facet_clevland
 ````
@@ -254,14 +247,3 @@ home_care_facet_clevland
 ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, width=10, height=10)
 ```
 
-
-
-
-
-
-
-   +
-  coord_flip()
-
-home_care_facet
-```

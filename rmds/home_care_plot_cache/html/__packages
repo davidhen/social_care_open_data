@@ -1,11 +1,9 @@
 base
-knitr
-rmarkdown
 dplyr
 forcats
 ggplot2
 ggthemes
-ggsci
-cowplot
 extrafont
 bindrcpp
+knitr
+rmarkdown

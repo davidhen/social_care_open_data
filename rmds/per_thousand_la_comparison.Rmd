@@ -38,7 +38,10 @@ library(stringr)
 library(ggplot2)
 library(ggthemes)
 library(extrafont)
-loadfonts()
+theme_set(theme_tufte(base_size = 18))
+ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165AF",
+                  "#BCD032","#866BAC", "#545A5D",  "#7A8082", "#E2D988", "#628DB7",
+                  "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
 ```
 
 #Overall numbers
@@ -93,23 +96,19 @@ Now we can plot these
 ```{r total_plot, fig.height=8, fig.width = 10, warning = FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
-  geom_point(color = "#5F559BFF", size = 3) +
+  geom_point(color = ubdc_palette[1], size = 3) +
   geom_text(aes(label=paste0(pct_total,"%")), size = 3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.x = element_text(size = 12),
-        text = element_text(family = "Roboto", size = 9),
-        plot.title = element_text(family = "Roboto Condensed", size = 18,
-                                  hjust = 0, face = "bold"),
-        plot.subtitle = element_text(color = "#666666"),
-        plot.caption = element_text("#AAAAAA", size = 10)) +
+  theme(plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10),
+        panel.grid.major.y = element_line(colour = "#f2f2f2")) +
   labs(
     title = "Count of Social Care Clients",
     subtitle = "With percentage of total",
     x = "",
     y = "Number of Clients",
     caption = "2012 Social Care Survey") +
-  coord_flip() +
-  theme_hc()
+  coord_flip()
 ```
 
 
@@ -118,16 +117,12 @@ And repeat for **only** home care clients
 ```{r home_care_plot, fig.height=9, fig.width=10, warning=FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_homecare), N_homecare)) +
-  geom_point(color = "#EE0000FF", size = 3) +
+  geom_point(color = ubdc_palette[3], size = 3) +
   geom_text(aes(label=paste0(pct_homecare,"%")), size=3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.x = element_text(size = 12),
-        text = element_text(family = "Roboto", size = 9),
-        plot.title = element_text(family = "Roboto Condensed", size = 18,
-                                  hjust = 0, face = "bold"),
-        plot.subtitle = element_text(color = "#666666"),
-        plot.caption = element_text("#AAAAAA", size = 10)) +
-  theme_hc() +
+  theme(plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10),
+        panel.grid.major.y = element_line(colour = "#f2f2f2")) +
   labs(
     title = "Count of Home Care Clients",
     subtitle = "With percentage of total",
@@ -143,18 +138,14 @@ And non-home care clients i.e. telecare or other services only
 ```{r telecare_plot, fig.height= 8, fig.width=10, warning=FALSE}
 
 ggplot(summary_2012_table, aes(reorder(council, -N_telecare), N_telecare)) +
-  geom_point(color = "#008280FF", size = 3) +
+  geom_point(color = ubdc_palette[4], size = 3) +
   geom_text(aes(label=paste0(pct_telecare,"%")), size=3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
-  theme(axis.text.x = element_text(size = 12),
-        text = element_text(family = "Roboto", size = 9),
-        plot.title = element_text(family = "Roboto Condensed", size = 18,
-                                  hjust = 0, face = "bold"),
-        plot.subtitle = element_text(color = "#666666"),
-        plot.caption = element_text("#AAAAAA", size = 10)) +
-  theme_hc() +
+  theme(plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10),
+        panel.grid.major.y = element_line(colour = "#f2f2f2")) +
   labs(
-    title = "Count of Telecare and other services Clients",
+    title = "Count of telecare and other services clients",
     subtitle = "With percentage of total",
     x = "",
     y = "",
@@ -275,19 +266,15 @@ Finally! Let's take a look
 ggplot(per_thousand_table, 
        aes(x = reorder(council, -any_care_per_thousand), 
            y = any_care_per_thousand)) +
-  geom_point(color = "#631879FF", size = 3) +
-  theme(axis.text.x = element_text(size = 12),
-        text = element_text(family = "Roboto", size = 9),
-        plot.title = element_text(family = "Roboto Condensed", size = 18,
-                                  hjust = 0, face = "bold"),
-        plot.subtitle = element_text(color = "#666666"),
-        plot.caption = element_text("#AAAAAA", size = 10)) +
-  theme_hc() +
+  geom_point(color = ubdc_palette[5], size = 3) +
+  theme(plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10),
+        panel.grid.major.y = element_line(colour = "#f2f2f2")) +
   labs(
-    title = "Proportion of over65 receiving any form of social care",
+    title = "Standardised rate per 1000 over-65 receiving\nany form of social care",
     subtitle = "by Local Authority",
     x = "",
-    y = "Number per thousand population 65+",
+    y = "Standardised rate per 1000 65+",
     caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate") +
   coord_flip()
 ```
@@ -315,20 +302,16 @@ per_thousand_table %>%
   ggplot(., 
        aes(x = reorder(council, -any_care_per_thousand), 
            y = any_care_per_thousand)) +
-  geom_point(color = "#631879FF", size = 3) +
-  theme(axis.text.x = element_text(size = 12),
-        text = element_text(family = "Roboto", size = 9),
-        plot.title = element_text(family = "Roboto Condensed", size = 18,
-                                  hjust = 0, face = "bold"),
-        plot.subtitle = element_text(color = "#666666"),
-        plot.caption = element_text("#AAAAAA", size = 10)) +
-  theme_hc() +
+  geom_point(color = ubdc_palette[5], size = 3) +
+  theme(plot.subtitle = element_text(color = "#666666"),
+        plot.caption = element_text("#AAAAAA", size = 10),
+        panel.grid.major.y = element_line(colour = "#f2f2f2")) +
   labs(
-    title = "Proportion of over65 receiving any form of social care",
+    title = "Standardised rate per 1000 over-65 receiving\nany form of social care",
     subtitle = "by Local Authority",
     x = "",
-    y = "Number per thousand population 65+",
-    caption = "2012 Social Care Survey, population estimates from NRS 2011 census estimate") +
+    y = "Standardised rate per 1000 65+",
+    caption = "2012 Social Care Survey \nPopulation estimates from NRS 2011 census estimate\nHighland council removed due to large amount of missing data") +
   coord_flip()
 ```
 
