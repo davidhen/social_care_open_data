@@ -240,6 +240,6 @@ home_care_facet_clevland
 
 
 ```{r}
-ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, dpi = 300)
+ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, dpi = 1000)
 ```
 

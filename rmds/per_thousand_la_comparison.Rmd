@@ -401,5 +401,5 @@ homecare_plot_clevland
 ```
 
 ```{r save_p,eval=FALSE}
-ggsave("plots/over65s_homecare_clevland.png", homecare_plot_clevland, dpi = 300)
+ggsave("plots/over65s_homecare_clevland.png", homecare_plot_clevland, dpi =1000)
 ```
