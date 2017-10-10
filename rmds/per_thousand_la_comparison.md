@@ -1,34 +1,26 @@
----
-title: "Social Care Survey Open Data"
-subtitle: "Simple descriptive analysis"
-output: github_document
----
+Social Care Survey Open Data
+================
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
-```
-
-
-
-#Introduction
+Introduction
+============
 
 Plot to compare number of over 65s per 1000 population receiving social care.
 
-Based on 2012 Social Care Survey Open Data. The offical report plots per thousand population receiving home care but for the whole population - let's concentrate on over 65s. 
+Based on 2012 Social Care Survey Open Data. The offical report plots per thousand population receiving home care but for the whole population - let's concentrate on over 65s.
 
-##Load data
+Load data
+---------
 
-```{r load_data}
+``` r
 load("produced_data/created_objects/soc_care12.rds")
 
 # This object is the cleaned version of the 2012 social care survey and was created in the file ("reports/01-import_and_tidy.html") or raw rmarkdown can be found ("rmds/import_and_tidy.Rmd")
 ```
 
-##Load packages
+Load packages
+-------------
 
-```{r packages, message=FALSE, warning=FALSE}
+``` r
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -44,11 +36,12 @@ ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165A
                   "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
 ```
 
-#Overall numbers
+Overall numbers
+===============
 
 1st thing is to look at the overall numbers of records returned for each local autority area.
 
-```{r councils, fig.height=10}
+``` r
 #summarise overall data first
 total_summary_2012 <-
   soc_care12 %>%
@@ -83,18 +76,39 @@ telecare_summary_2012 <-
 summary_2012_table <-
   left_join(total_summary_2012, home_care_summary_2012) %>%
   left_join(., telecare_summary_2012)
-
-summary_2012_table
-
-rm(list = c("home_care_summary_2012", "total_summary_2012", "telecare_summary_2012"))
-
 ```
 
+    ## Joining, by = "council"
+    ## Joining, by = "council"
+
+``` r
+summary_2012_table
+```
+
+    ## # A tibble: 32 x 10
+    ##                council N_total freq_total pct_total N_homecare
+    ##                 <fctr>   <int>      <dbl>     <dbl>      <int>
+    ##  1       Aberdeen City    2969 0.02558490       2.6       1784
+    ##  2       Aberdeenshire    3308 0.02850618       2.9       1828
+    ##  3               Angus    3643 0.03139299       3.1       1326
+    ##  4       Argyll & Bute    1774 0.01528717       1.5        836
+    ##  5    Clackmannanshire    1317 0.01134905       1.1        546
+    ##  6 Dumfries & Galloway    3171 0.02732561       2.7       1993
+    ##  7         Dundee City    4991 0.04300918       4.3       1614
+    ##  8       East Ayrshire    3086 0.02659313       2.7       1632
+    ##  9 East Dunbartonshire    2208 0.01902710       1.9        963
+    ## 10        East Lothian    1353 0.01165927       1.2       1175
+    ## # ... with 22 more rows, and 5 more variables: freq_homecare <dbl>,
+    ## #   pct_homecare <dbl>, N_telecare <int>, freq_telecare <dbl>,
+    ## #   pct_telecare <dbl>
+
+``` r
+rm(list = c("home_care_summary_2012", "total_summary_2012", "telecare_summary_2012"))
+```
 
 Now we can plot these
 
-```{r total_plot, fig.height=8, fig.width = 10, warning = FALSE}
-
+``` r
 ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
   geom_point(color = ubdc_palette[1], size = 3) +
   geom_text(aes(label=paste0(pct_total,"%")), size = 3, hjust = -0.3, vjust = -0.2) +
@@ -111,11 +125,11 @@ ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
   coord_flip()
 ```
 
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/total_plot-1.png)
 
 And repeat for **only** home care clients
 
-```{r home_care_plot, fig.height=9, fig.width=10, warning=FALSE}
-
+``` r
 ggplot(summary_2012_table, aes(reorder(council, -N_homecare), N_homecare)) +
   geom_point(color = ubdc_palette[3], size = 3) +
   geom_text(aes(label=paste0(pct_homecare,"%")), size=3, hjust = -0.3, vjust = -0.2) +
@@ -130,13 +144,13 @@ ggplot(summary_2012_table, aes(reorder(council, -N_homecare), N_homecare)) +
     y = "Number of home care clients",
     caption = "2012 Social Care Survey") +
   coord_flip()
-
 ```
+
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/home_care_plot-1.png)
 
 And non-home care clients i.e. telecare or other services only
 
-```{r telecare_plot, fig.height= 8, fig.width=10, warning=FALSE}
-
+``` r
 ggplot(summary_2012_table, aes(reorder(council, -N_telecare), N_telecare)) +
   geom_point(color = ubdc_palette[4], size = 3) +
   geom_text(aes(label=paste0(pct_telecare,"%")), size=3, hjust = -0.3, vjust = -0.2) +
@@ -153,19 +167,23 @@ ggplot(summary_2012_table, aes(reorder(council, -N_telecare), N_telecare)) +
   coord_flip()
 ```
 
-#Population Proportions
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/telecare_plot-1.png)
 
-##Import and tidy census data
+Population Proportions
+======================
+
+Import and tidy census data
+---------------------------
 
 To calculate proportions of over 65s getting care in each local authority we need the total number of over 65s in that LA.
 
-For this I am going to use the 2011 Population estimates downloaded from the National Records of Scotland here:-  <https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/2011-census-reconciliation-report/list-of-tables>
+For this I am going to use the 2011 Population estimates downloaded from the National Records of Scotland here:- <https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/2011-census-reconciliation-report/list-of-tables>
 
 This data needs imported and cleaned.
 
 I'm going to create `pop_data_combined`: a `data_frame` with population sizes of each Local Authority as a total and for over 65s
 
-```{r import_pop_data, warning=FALSE, message=FALSE}
+``` r
 #Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
 
 #import and tidy raw data
@@ -209,18 +227,43 @@ pop_data_combined_2011 <-
   full_join(pop_data_total, pop_data_65plus)  
 
 pop_data_combined_2011
+```
 
+    ## # A tibble: 32 x 3
+    ##                council pop_total pop_over_65
+    ##                  <chr>     <dbl>       <dbl>
+    ##  1       Aberdeen City    222793       32031
+    ##  2       Aberdeenshire    252973       40663
+    ##  3               Angus    115978       23061
+    ##  4       Argyll & Bute     88166       19336
+    ##  5    Clackmannanshire     51442        8212
+    ##  6 Dumfries & Galloway    151324       33050
+    ##  7         Dundee City    147268       24597
+    ##  8       East Ayrshire    122767       21307
+    ##  9 East Dunbartonshire    105026       20428
+    ## 10        East Lothian     99717       17763
+    ## # ... with 22 more rows
+
+``` r
 rm(list = c("pop_data_65plus", "pop_data_total", "pop_data"))
 ```
 
-##Join to social care data
+Join to social care data
+------------------------
 
-Ok, now to join together the population and social care summaries. 
+Ok, now to join together the population and social care summaries.
 
-```{r join_pop_and_summary}
+``` r
 summary_2012_table <-
   left_join(pop_data_combined_2011, summary_2012_table)
+```
 
+    ## Joining, by = "council"
+
+    ## Warning: Column `council` joining character vector and factor, coercing
+    ## into character vector
+
+``` r
 #refactorise council
 summary_2012_table$council <- as.factor(summary_2012_table$council)
 
@@ -231,11 +274,29 @@ summary_2012_table <- select(summary_2012_table, -pop_total)
 summary_2012_table
 ```
 
-##Calculate proportions per population
+    ## # A tibble: 32 x 11
+    ##                council pop_over_65 N_total freq_total pct_total N_homecare
+    ##                 <fctr>       <dbl>   <int>      <dbl>     <dbl>      <int>
+    ##  1       Aberdeen City       32031    2969 0.02558490       2.6       1784
+    ##  2       Aberdeenshire       40663    3308 0.02850618       2.9       1828
+    ##  3               Angus       23061    3643 0.03139299       3.1       1326
+    ##  4       Argyll & Bute       19336    1774 0.01528717       1.5        836
+    ##  5    Clackmannanshire        8212    1317 0.01134905       1.1        546
+    ##  6 Dumfries & Galloway       33050    3171 0.02732561       2.7       1993
+    ##  7         Dundee City       24597    4991 0.04300918       4.3       1614
+    ##  8       East Ayrshire       21307    3086 0.02659313       2.7       1632
+    ##  9 East Dunbartonshire       20428    2208 0.01902710       1.9        963
+    ## 10        East Lothian       17763    1353 0.01165927       1.2       1175
+    ## # ... with 22 more rows, and 5 more variables: freq_homecare <dbl>,
+    ## #   pct_homecare <dbl>, N_telecare <int>, freq_telecare <dbl>,
+    ## #   pct_telecare <dbl>
+
+Calculate proportions per population
+------------------------------------
 
 Finally, I'm going to calculate the per thousand proportions.
 
-```{r per_thousands}
+``` r
 per_thousand_table <-
   summary_2012_table %>%
   mutate(any_care_per_thousand = (round((N_total / pop_over_65) * 1000, 1)),  
@@ -245,24 +306,42 @@ per_thousand_table <-
 per_thousand_table
 ```
 
-##Save objects
+    ## # A tibble: 32 x 4
+    ##                council any_care_per_thousand homecare_per_thousand
+    ##                 <fctr>                 <dbl>                 <dbl>
+    ##  1       Aberdeen City                  92.7                  55.7
+    ##  2       Aberdeenshire                  81.4                  45.0
+    ##  3               Angus                 158.0                  57.5
+    ##  4       Argyll & Bute                  91.7                  43.2
+    ##  5    Clackmannanshire                 160.4                  66.5
+    ##  6 Dumfries & Galloway                  95.9                  60.3
+    ##  7         Dundee City                 202.9                  65.6
+    ##  8       East Ayrshire                 144.8                  76.6
+    ##  9 East Dunbartonshire                 108.1                  47.1
+    ## 10        East Lothian                  76.2                  66.1
+    ## # ... with 22 more rows, and 1 more variables: telecare_per_thousand <dbl>
+
+Save objects
+------------
 
 I'm going to save the objects created so far.
 
-```{r save, eval=FALSE}
+``` r
 save(summary_2012_table, file = "produced_data/created_objects/summary_2012_table.rds")
 save(pop_data_2011, file = "produced_data/created_objects/pop_data_2011.rds")
 save(pop_data_combined_2011, file = "produced_data/created_objects/pop_data_combined_2011.rds")
 save(per_thousand_table, file = "produced_data/created_objects/per_thousand_table.rds")
 ```
 
-#Plots
+Plots
+=====
 
-##Any social care
+Any social care
+---------------
 
 Finally! Let's take a look
 
-```{r any_care_plot, fig.height=8, fig.width=10, warning=FALSE}
+``` r
 ggplot(per_thousand_table, 
        aes(x = reorder(council, -any_care_per_thousand), 
            y = any_care_per_thousand)) +
@@ -279,10 +358,11 @@ ggplot(per_thousand_table,
   coord_flip()
 ```
 
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/any_care_plot-1.png)
+
 Just to check that missing data isn't accounting for the variation....
 
-
-```{r count_missing}
+``` r
 missing <- 
   soc_care12 %>%
   group_by(council, age_grp) %>%
@@ -291,12 +371,28 @@ missing <-
 missing
 ```
 
+    ## # A tibble: 12 x 3
+    ## # Groups:   council [12]
+    ##               council age_grp     n
+    ##                <fctr>  <fctr> <int>
+    ##  1      Argyll & Bute    <NA>     6
+    ##  2 Edinburgh, City of    <NA>   108
+    ##  3        Eilean Siar    <NA>    26
+    ##  4       Glasgow City    <NA>    10
+    ##  5           Highland    <NA>  1152
+    ##  6         Midlothian    <NA>    12
+    ##  7              Moray    <NA>     6
+    ##  8    Perth & Kinross    <NA>     1
+    ##  9   Scottish Borders    <NA>     1
+    ## 10   Shetland Islands    <NA>     6
+    ## 11           Stirling    <NA>    15
+    ## 12       West Lothian    <NA>     1
 
-So with the exception of Highland, no area has a significant amount of missing data to majorly skew results. 
+So with the exception of Highland, no area has a significant amount of missing data to majorly skew results.
 
-I'm going to remove Highland fromt the overall plot. It is likely a lot of their missing data is for over 65s. 
+I'm going to remove Highland fromt the overall plot. It is likely a lot of their missing data is for over 65s.
 
-```{r any_care_plot_no_highland, fig.height=8, fig.width=10, warning=FALSE}
+``` r
 per_thousand_table %>%
   filter(council != "Highland") %>%
   ggplot(., 
@@ -315,9 +411,12 @@ per_thousand_table %>%
   coord_flip()
 ```
 
-## Home care only
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/any_care_plot_no_highland-1.png)
 
-```{r home_care_only_plot, fig.height=6, fig.width=6}
+Home care only
+--------------
+
+``` r
 homecare_plot<- 
   per_thousand_table %>%
   filter(council != "Highland") %>%
@@ -342,17 +441,18 @@ homecare_plot<-
 homecare_plot
 ```
 
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/home_care_only_plot-1.png)
+
 Save this plot (for UBDC blog!)
 
-```{r save_plot,eval=FALSE}
+``` r
 ggsave("plots/over65s_homecare.png", homecare_plot, width=6, height=6)
 ```
 
+Telecare only
+-------------
 
-
-##Telecare only
-
-```{r telecare_only_plot, fig.height=10}
+``` r
 per_thousand_table %>%
   filter(council != "Highland") %>%
   ggplot(., 
@@ -372,11 +472,14 @@ per_thousand_table %>%
   coord_flip()
 ```
 
-#Alternative UBDC blog plot
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/telecare_only_plot-1.png)
+
+Alternative UBDC blog plot
+==========================
 
 Going to try a Clevland dotplot.
 
-```{r clevland, fig.height=6, fig.width=6}
+``` r
 homecare_plot_clevland<- 
   per_thousand_table %>%
   filter(council != "Highland") %>%
@@ -400,6 +503,8 @@ homecare_plot_clevland<-
 homecare_plot_clevland
 ```
 
-```{r save_p,eval=FALSE}
+![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/clevland-1.png)
+
+``` r
 ggsave("plots/over65s_homecare_clevland.png", homecare_plot_clevland, dpi =1000)
 ```

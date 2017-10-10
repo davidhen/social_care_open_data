@@ -1,0 +1,11 @@
+base
+readr
+dplyr
+tidyr
+purrr
+forcats
+stringr
+ggplot2
+ggthemes
+extrafont
+bindrcpp
