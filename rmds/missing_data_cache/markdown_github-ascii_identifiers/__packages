@@ -1,0 +1,11 @@
+base
+dplyr
+ggplot2
+geofacet
+ggthemes
+mice
+colorspace
+data.table
+VIM
+bindrcpp
+forcats
