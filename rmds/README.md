@@ -1,5 +1,1 @@
-About this `rmds` folder
-
-Contains the R markdown files
-
-To view rendered (with plots) code - Look at each of the files with the .md extension
+#Look at .md files for rendered (with plots) output
