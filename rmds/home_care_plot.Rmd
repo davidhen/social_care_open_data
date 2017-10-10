@@ -231,7 +231,7 @@ home_care_facet_clevland <-
   theme(legend.position = "none",
         plot.subtitle = element_text(color="#666666", size = 10),
         plot.caption = element_text(color="#AAAAAA", size=10),
-        axis.text.x = element_text(size = 6, face = "bold"),
+        axis.text.x = element_text(size = 7, face = "bold"),
         panel.grid.major = element_line(color = "#f2f2f2")) +
   scale_color_manual(values = ubdc_palette)
 
@@ -240,6 +240,6 @@ home_care_facet_clevland
 
 
 ```{r}
-ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, width=6, height=6)
+ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, dpi = 300)
 ```
 
