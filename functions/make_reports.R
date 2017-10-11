@@ -26,7 +26,14 @@ report <- function(file, n_file = "", open_file = default_open_file,
   ### Render ###
   render(
     input = file,
-    output_format = github_document(),
+    output_format = rmarkdown::html_document(
+      theme = "spacelab",
+      df_print = "paged",
+      toc = TRUE,
+      toc_float = TRUE,
+      number_sections = TRUE,
+      code_folding = "hide"
+    ),
     output_file = file_name,
     output_dir = report_dir,
     envir = new.env()
