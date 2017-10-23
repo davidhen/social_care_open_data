@@ -231,7 +231,7 @@ home_care_facet_clevland <-
            x = council,
            y = freq,   #I'll use scales::percent below
            color = total_hrs)) + 
-  geom_point(size = 2) +
+  geom_point(size = 0.5) +
   facet_wrap(~total_hrs, ncol = 5) +
   scale_x_discrete(limits = ordered_LAs) +
   scale_y_continuous(labels = scales::percent) + #Using freq instead of percent variable
@@ -243,10 +243,11 @@ home_care_facet_clevland <-
        caption = "2012 Social Care Survey\nHighland council removed due large amount of missing data")  +
   coord_flip() +
   theme(legend.position = "none",
-        plot.subtitle = element_text(color="#666666", size = 10),
-        plot.caption = element_text(color="#AAAAAA", size=10),
-        axis.text.x = element_text(size = 7, face = "bold"),
-        panel.grid.major = element_line(color = "#f2f2f2")) +
+        text = element_text(size = 6),
+        plot.subtitle = element_text(color="#666666"),
+        plot.caption = element_text(color="#AAAAAA"),
+        axis.text.x = element_text(size = 4, face = "bold"),
+        panel.grid.major = element_line(color = "#e6e6e6")) +
   scale_color_manual(values = ubdc_palette)
 
 home_care_facet_clevland
@@ -255,7 +256,5 @@ home_care_facet_clevland
 ![](home_care_plot_files/figure-markdown_github-ascii_identifiers/clevland-1.png)
 
 ``` r
-ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, dpi = 1000)
+ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, width = 4, height = 3)
 ```
-
-    ## Saving 7 x 5 in image
