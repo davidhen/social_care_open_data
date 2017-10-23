@@ -1,0 +1,164 @@
+---
+title: "Facet plots"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
+```
+
+#Introduction
+
+Going to have a wee play trying to plot facetted (small multiple) data with main dataset in the background. Based on [this plot](link here!!!!)
+
+
+##Load data
+
+I'll use the 2012 social care survey data cleaned in `import_and_tidy.Rmd`
+
+```{r load_data}
+load("produced_data/created_objects/soc_care12.rds")
+```
+
+##Load packages
+
+```{r packages, message=FALSE}
+library(tidyverse)
+library(forcats)
+library(ggthemes)
+library(geofacet)
+library(extrafont)
+theme_set(theme_tufte(base_size = 18))
+ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165AF",
+                  "#BCD032","#866BAC", "#545A5D",  "#7A8082", "#E2D988", "#628DB7",
+                  "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
+```
+
+
+#Plot `age_grp`
+
+##Glimpse
+
+Quick reminder of what the data looks like
+
+```{r glimpse}
+glimpse(soc_care12)
+```
+
+
+##Create data frame without grouping variable
+
+To start with I am going to try and plot the distribution of `age_grp` using `gender` as a facet.
+
+To do this I will need a dataframe *without* the `gender` variable
+
+```{r ungrouped_set}
+nogen <- soc_care12 %>% select (-gender)
+```
+
+...and now plot
+
+##plot 
+
+```{r plot_background}
+ggplot(soc_care12, aes(age_grp)) + 
+  geom_bar(data = nogen, fill = ubdc_palette[18]) +
+  geom_bar() +
+  facet_wrap(~ gender)
+rm(nogen)
+```
+
+Will try something a bit more adventurous now. 
+
+#Plot `home_care_hrs`
+
+In `home_care_plot.md` I compared the number of home care hours across Local Authorities. Will try and see if the background plot makes this comparison easier. 
+
+##Create dataframe
+
+I'll need to recreate the summary data
+
+1st of all collapse the total_hrs variable into smaller factor levels.
+
+Currently <1, 1-2, 2-4, 4-6, 6-8, 8-10, 10-15, 15-20, 20-30, 30-40, and over 50.
+
+I'll collapse these levels to <4, 4-10, 10-15, and over 20
+
+```{r fct_collapse}
+soc_care12$total_hrs <- 
+  fct_collapse(soc_care12$total_hrs, 
+               `<4` = c("<1", "1-2", "2-4"),
+               `4-10` = c("4-6", "6-8", "8-10"), #10-15 stays as is
+               over20 = c("20-30", "30-40", "40-50", "over50"))
+```
+
+Now summarise the data
+
+```{r summarise_home_care_hrs}
+home_care_hrs_council <-
+  soc_care12 %>%
+  filter(hc_client == "Yes") %>%      #keep only home care clients
+  filter(age_grp != "18-<65") %>%     #keep only those over 65
+  filter(council != "Highland") %>%   #remove highland due to missing data
+  group_by(council, total_hrs) %>%
+  summarize(N = n()) %>%
+  mutate(freq = N / sum(N),
+         pct = round((freq*100), 1)) 
+
+home_care_hrs_total <-
+  soc_care12 %>% 
+  filter(hc_client == "Yes") %>%      #keep only home care clients
+  filter(age_grp != "18-<65") %>%     #keep only those over 65
+  filter(council != "Highland") %>%   #remove highland due to missing data
+  group_by(total_hrs) %>% 
+  summarise(N = n()) %>% 
+  mutate(freq = N / sum(N),
+         pct = round((freq * 100), 2))
+
+home_care_hrs_council
+home_care_hrs_total
+  
+```
+
+
+'''and plot
+
+```{r home_care_hrs, fig.width=16, fig.height=16}
+ggplot(home_care_hrs_council, aes(total_hrs, freq)) +
+  geom_bar(stat = "identity", data = home_care_hrs_total, fill = ubdc_palette[1]) +
+  geom_bar(stat = "identity", fill = ubdc_palette[5], alpha = 0.6) +
+  facet_geo(~ council, grid = "scotland_local_authority_grid1") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(
+    title = "Percentage of hours of home care",
+    subtitle = "by Local Authority",
+    x = "",
+    y = "")
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
