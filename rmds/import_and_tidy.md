@@ -1608,80 +1608,80 @@ devtools::session_info()
     ## Session info -------------------------------------------------------------
 
     ##  setting  value                       
-    ##  version  R version 3.4.1 (2017-06-30)
-    ##  system   x86_64, mingw32             
+    ##  version  R version 3.4.2 (2017-09-28)
+    ##  system   i386, mingw32               
     ##  ui       RTerm                       
     ##  language (EN)                        
     ##  collate  English_United Kingdom.1252 
     ##  tz       Europe/London               
-    ##  date     2017-10-10
+    ##  date     2017-10-25
 
     ## Packages -----------------------------------------------------------------
 
     ##  package    * version date       source        
-    ##  assertthat   0.2.0   2017-04-11 CRAN (R 3.4.0)
+    ##  assertthat   0.2.0   2017-04-11 CRAN (R 3.4.2)
     ##  backports    1.1.1   2017-09-25 CRAN (R 3.4.1)
-    ##  base       * 3.4.1   2017-06-30 local         
-    ##  bindr        0.1     2016-11-13 CRAN (R 3.4.0)
-    ##  bindrcpp     0.2     2017-06-17 CRAN (R 3.4.0)
-    ##  broom        0.4.2   2017-02-13 CRAN (R 3.4.1)
-    ##  cellranger   1.1.0   2016-07-27 CRAN (R 3.4.0)
-    ##  codetools    0.2-15  2016-10-05 CRAN (R 3.4.1)
-    ##  colorspace   1.3-2   2016-12-14 CRAN (R 3.4.0)
-    ##  compiler     3.4.1   2017-06-30 local         
-    ##  datasets   * 3.4.1   2017-06-30 local         
-    ##  devtools     1.13.3  2017-08-02 CRAN (R 3.4.1)
-    ##  digest       0.6.12  2017-01-27 CRAN (R 3.4.0)
-    ##  dplyr      * 0.7.4   2017-09-28 CRAN (R 3.4.1)
-    ##  evaluate     0.10.1  2017-06-24 CRAN (R 3.4.0)
-    ##  forcats    * 0.2.0   2017-01-23 CRAN (R 3.4.0)
-    ##  foreign      0.8-69  2017-06-22 CRAN (R 3.4.1)
+    ##  base       * 3.4.2   2017-09-28 local         
+    ##  bindr        0.1     2016-11-13 CRAN (R 3.4.2)
+    ##  bindrcpp     0.2     2017-06-17 CRAN (R 3.4.2)
+    ##  broom        0.4.2   2017-02-13 CRAN (R 3.4.0)
+    ##  cellranger   1.1.0   2016-07-27 CRAN (R 3.4.2)
+    ##  codetools    0.2-15  2016-10-05 CRAN (R 3.4.2)
+    ##  colorspace   1.3-2   2016-12-14 CRAN (R 3.4.2)
+    ##  compiler     3.4.2   2017-09-28 local         
+    ##  datasets   * 3.4.2   2017-09-28 local         
+    ##  devtools     1.13.3  2017-08-02 CRAN (R 3.4.2)
+    ##  digest       0.6.12  2017-01-27 CRAN (R 3.4.2)
+    ##  dplyr      * 0.7.4   2017-09-28 CRAN (R 3.4.2)
+    ##  evaluate     0.10.1  2017-06-24 CRAN (R 3.4.2)
+    ##  forcats    * 0.2.0   2017-01-23 CRAN (R 3.4.2)
+    ##  foreign      0.8-69  2017-06-21 CRAN (R 3.4.2)
     ##  ggplot2    * 2.2.1   2016-12-30 CRAN (R 3.4.1)
-    ##  glue         1.1.1   2017-06-21 CRAN (R 3.4.1)
-    ##  graphics   * 3.4.1   2017-06-30 local         
-    ##  grDevices  * 3.4.1   2017-06-30 local         
-    ##  grid         3.4.1   2017-06-30 local         
+    ##  glue         1.1.1   2017-06-21 CRAN (R 3.4.2)
+    ##  graphics   * 3.4.2   2017-09-28 local         
+    ##  grDevices  * 3.4.2   2017-09-28 local         
+    ##  grid         3.4.2   2017-09-28 local         
     ##  gtable       0.2.0   2016-02-26 CRAN (R 3.4.0)
-    ##  haven        1.1.0   2017-07-09 CRAN (R 3.4.1)
+    ##  haven        1.1.0   2017-07-09 CRAN (R 3.4.2)
     ##  hms          0.3     2016-11-22 CRAN (R 3.4.0)
     ##  htmltools    0.3.6   2017-04-28 CRAN (R 3.4.0)
     ##  httr         1.3.1   2017-08-20 CRAN (R 3.4.1)
     ##  jsonlite     1.5     2017-06-01 CRAN (R 3.4.0)
     ##  knitr        1.17    2017-08-10 CRAN (R 3.4.1)
     ##  labeling     0.3     2014-08-23 CRAN (R 3.4.0)
-    ##  lattice      0.20-35 2017-03-25 CRAN (R 3.4.1)
-    ##  lazyeval     0.2.0   2016-06-12 CRAN (R 3.4.1)
-    ##  lubridate    1.6.0   2016-09-13 CRAN (R 3.4.1)
+    ##  lattice      0.20-35 2017-03-25 CRAN (R 3.4.2)
+    ##  lazyeval     0.2.0   2016-06-12 CRAN (R 3.4.2)
+    ##  lubridate    1.6.0   2016-09-13 CRAN (R 3.4.2)
     ##  magrittr     1.5     2014-11-22 CRAN (R 3.4.1)
     ##  memoise      1.1.0   2017-04-21 CRAN (R 3.4.0)
-    ##  methods    * 3.4.1   2017-06-30 local         
+    ##  methods    * 3.4.2   2017-09-28 local         
     ##  mnormt       1.5-5   2016-10-15 CRAN (R 3.4.0)
     ##  modelr       0.1.1   2017-07-24 CRAN (R 3.4.0)
     ##  munsell      0.4.3   2016-02-13 CRAN (R 3.4.0)
-    ##  nlme         3.1-131 2017-02-06 CRAN (R 3.4.1)
-    ##  parallel     3.4.1   2017-06-30 local         
+    ##  nlme         3.1-131 2017-02-06 CRAN (R 3.4.2)
+    ##  parallel     3.4.2   2017-09-28 local         
     ##  pkgconfig    2.0.1   2017-03-21 CRAN (R 3.4.0)
-    ##  plyr         1.8.4   2016-06-08 CRAN (R 3.4.1)
+    ##  plyr         1.8.4   2016-06-08 CRAN (R 3.4.2)
     ##  psych        1.7.8   2017-09-09 CRAN (R 3.4.1)
-    ##  purrr      * 0.2.3   2017-08-02 CRAN (R 3.4.1)
+    ##  purrr      * 0.2.4   2017-10-18 CRAN (R 3.4.2)
     ##  R6           2.2.2   2017-06-17 CRAN (R 3.4.0)
-    ##  Rcpp         0.12.13 2017-09-28 CRAN (R 3.4.1)
-    ##  readr      * 1.1.1   2017-05-16 CRAN (R 3.4.1)
-    ##  readxl       1.0.0   2017-04-18 CRAN (R 3.4.1)
+    ##  Rcpp         0.12.13 2017-09-28 CRAN (R 3.4.2)
+    ##  readr      * 1.1.1   2017-05-16 CRAN (R 3.4.2)
+    ##  readxl       1.0.0   2017-04-18 CRAN (R 3.4.2)
     ##  reshape2     1.4.2   2016-10-22 CRAN (R 3.4.0)
-    ##  rlang        0.1.2   2017-08-09 CRAN (R 3.4.0)
+    ##  rlang        0.1.2   2017-08-09 CRAN (R 3.4.2)
     ##  rmarkdown    1.6     2017-06-15 CRAN (R 3.4.1)
     ##  rprojroot    1.2     2017-01-16 CRAN (R 3.4.0)
     ##  rvest        0.3.2   2016-06-17 CRAN (R 3.4.0)
-    ##  scales       0.5.0   2017-08-24 CRAN (R 3.4.1)
-    ##  stats      * 3.4.1   2017-06-30 local         
+    ##  scales       0.5.0   2017-08-24 CRAN (R 3.4.2)
+    ##  stats      * 3.4.2   2017-09-28 local         
     ##  stringi      1.1.5   2017-04-07 CRAN (R 3.4.1)
-    ##  stringr      1.2.0   2017-02-18 CRAN (R 3.4.1)
+    ##  stringr      1.2.0   2017-02-18 CRAN (R 3.4.2)
     ##  tibble     * 1.3.4   2017-08-22 CRAN (R 3.4.1)
-    ##  tidyr      * 0.7.1   2017-09-01 CRAN (R 3.4.1)
-    ##  tidyverse  * 1.1.1   2017-01-27 CRAN (R 3.4.1)
-    ##  tools        3.4.1   2017-06-30 local         
-    ##  utils      * 3.4.1   2017-06-30 local         
+    ##  tidyr      * 0.7.2   2017-10-16 CRAN (R 3.4.2)
+    ##  tidyverse  * 1.1.1   2017-01-27 CRAN (R 3.4.2)
+    ##  tools        3.4.2   2017-09-28 local         
+    ##  utils      * 3.4.2   2017-09-28 local         
     ##  withr        2.0.0   2017-07-28 CRAN (R 3.4.0)
     ##  xml2         1.1.1   2017-01-24 CRAN (R 3.4.0)
     ##  yaml         2.1.14  2016-11-12 CRAN (R 3.4.0)
