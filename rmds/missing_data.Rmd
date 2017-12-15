@@ -42,6 +42,11 @@ Sticking with 2011 for now.
 
 ##Describe and visualise missing data
 
+```{r miss}
+propmiss(soc_care11)
+```
+
+
 ```{r missing_12}
 summary(soc_care11)
 ```

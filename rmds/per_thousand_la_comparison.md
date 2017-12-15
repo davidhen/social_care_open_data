@@ -109,7 +109,27 @@ rm(list = c("home_care_summary_2012", "total_summary_2012", "telecare_summary_20
 Now we can plot these
 
 ``` r
-ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
+library(plotly)
+```
+
+    ## 
+    ## Attaching package: 'plotly'
+
+    ## The following object is masked from 'package:ggplot2':
+    ## 
+    ##     last_plot
+
+    ## The following object is masked from 'package:stats':
+    ## 
+    ##     filter
+
+    ## The following object is masked from 'package:graphics':
+    ## 
+    ##     layout
+
+``` r
+sc_count <- 
+  ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
   geom_point(color = ubdc_palette[1], size = 3) +
   geom_text(aes(label=paste0(pct_total,"%")), size = 3, hjust = -0.3, vjust = -0.2) +
   scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000, 15000)) +
@@ -123,7 +143,11 @@ ggplot(summary_2012_table, aes(reorder(council, -N_total), N_total)) +
     y = "Number of Clients",
     caption = "2012 Social Care Survey") +
   coord_flip()
+ggplotly(sc_count)
 ```
+
+    ## We recommend that you use the dev version of ggplot2 with `ggplotly()`
+    ## Install it with: `devtools::install_github('hadley/ggplot2')`
 
 ![](per_thousand_la_comparison_files/figure-markdown_github-ascii_identifiers/total_plot-1.png)
 
