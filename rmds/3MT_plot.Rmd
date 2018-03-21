@@ -1,0 +1,269 @@
+---
+title: "3MT chart"
+output: 
+  html_document:
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/GitHub/social_care_open_data')
+```
+
+
+```{r packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(ggalt)
+library(cowplot)
+library(extrafont)
+theme_set(theme_cowplot(font_family = "Roboto Condensed", font_size = 28))
+ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165AF",
+                  "#BCD032","#866BAC", "#545A5D",  "#7A8082", "#E2D988", "#628DB7",
+                  "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
+```
+
+
+#First of all calculate population over 65
+
+```{r import_pop_data, warning=FALSE, message=FALSE}
+#Note I cheated and converted data to numeric in excel to remove the commas as 1000 seperators
+
+#import and tidy raw data
+pop_data <- read_csv("raw_data/2011-cen-rec-report-pop-tab1b.csv", skip = 3) %>%
+  slice(1:34) %>%
+  filter(X1 %in% c("Council areas") == FALSE) %>%
+  select(-X3, -X23, -X24) %>%
+  map_at(2:21, as.numeric) %>% #coerce from character to numeric
+  as_data_frame()
+
+names(pop_data) <- str_replace(names(pop_data), "X1", "council") #rename X variables
+names(pop_data) <- str_replace(names(pop_data), "X2", "total")
+
+#tidy data for manipulation
+pop_data_2011 <- 
+  pop_data %>%
+  gather(age_grp, value, 2:21) %>%  
+  arrange(council)
+
+#create table of total population per council
+pop_data_total <-
+  pop_data_2011 %>%
+  filter(age_grp == "total") %>%  
+  select(-age_grp) %>%
+  arrange(council)
+names(pop_data_total) <- str_replace(names(pop_data_total), "value", "pop_total")
+
+#create table of total over65s per council
+pop_data_65plus <-
+  pop_data_2011 %>%
+  filter(age_grp %in% c("65 - 69", "70 - 74", "75 - 79", "80 - 84", "85 - 89", 
+                        "90+") == TRUE) %>%
+  group_by(council) %>%
+  mutate(pop_over_65 = sum(value)) %>%    
+  arrange(council) %>%
+  select(council, pop_over_65) %>%
+  unique(.)
+
+#join tables together
+pop_data_combined_2011 <-
+  full_join(pop_data_total, pop_data_65plus)  
+
+pop_data_combined_2011 <- 
+  pop_data_combined_2011 %>% select(-pop_total)
+
+rm(list = c("pop_data_65plus", "pop_data_total", "pop_data"))
+```
+
+#Data on numbers from SCS
+
+##2016
+
+```{r dpasta}
+#Using cut and paste and datapasts
+scs_2016 <- 
+  tribble(
+       ~"Local_Authority", ~"0-17", ~"18-64", ~"65-74", ~"75-84",
+       ~"85+" , ~"Total",
+        "Aberdeen City",   10L,    280,    240,    580,      740,   1840,
+        "Aberdeenshire",   30L,    240,    290,    670,      910,   2140,
+                "Angus",   10L,    300,    180,    370,      510,   1360,
+        "Argyll & Bute",    0L,     70,    130,    380,      510,   1090,
+     "Clackmannanshire",   10L,    160,    100,    200,      230,    700,
+  "Dumfries & Galloway",   20L,    600,    340,    680,      810,   2440,
+          "Dundee City",    0L,    190,    270,    630,      780,   1870,
+        "East Ayrshire",    0L,    250,    300,    680,      620,   1840,
+  "East Dunbartonshire",    0L,    250,    150,    450,      470,   1330,
+         "East Lothian",   10L,    380,    180,    400,      480,   1450,
+    "East Renfrewshire",    0L,     60,    100,    300,      380,    830,
+   "Edinburgh, City of",    0L,   1330,    620,   1210,     1600,   4770,
+          "Eilean Siar",    0L,     30,     50,    140,      200,    420,
+              "Falkirk",   10L,    580,    410,    720,      730,   2450,
+                 "Fife",   30L,   1080,    540,    950,     1120,   3720,
+         "Glasgow City",   20L,    320,   1040,   2340,     2080,   5800,
+             "Highland",    0L,    230,    250,    630,      780,   1890,
+           "Inverclyde",    0L,    110,    210,    460,      480,   1270,
+           "Midlothian",    0L,    200,    160,    320,      300,    980,
+                "Moray",   10L,    160,    150,    360,      450,   1110,
+       "North Ayrshire",   10L,    440,    350,    680,      600,   2070,
+    "North Lanarkshire",   20L,    350,    650,   1360,     1160,   3530,
+       "Orkney Islands",    0L,     10,     20,     60,       90,    180,
+      "Perth & Kinross",    0L,    320,    190,    450,      650,   1610,
+         "Renfrewshire",   10L,    530,    370,    730,      640,   2290,
+     "Scottish Borders",    0L,    100,    170,    430,      570,   1270,
+     "Shetland Islands",    0L,     20,     50,    110,      130,    310,
+       "South Ayrshire",   10L,    330,    220,    480,      590,   1620,
+    "South Lanarkshire",   40L,    650,    460,   1130,     1170,   3430,
+             "Stirling",    0L,    380,    150,    310,      350,   1190,
+  "West Dunbartonshire",   50L,    140,    220,    530,      490,   1430,
+         "West Lothian",    0L,    490,    280,    460,      330,   1560,
+             "Scotland",  300L,  10560,   8820,  19160,    20940,  59780
+  ) %>% 
+  mutate(`2016` = select(.,`65-74`:`85+`) %>% rowSums()) %>% 
+  select(Local_Authority, `2016`) %>% 
+  rename(council = Local_Authority)
+```
+
+
+##2007
+
+```{r 2007}
+scs_2007 <-
+  tribble(
+       ~"Local_Authority", ~"0-17",   ~"18-64", ~"65-74", ~"75-84", ~"85+", ~"Total",
+        "Aberdeen City",   "*",      "*",    450,   1130,      960,   2950,
+        "Aberdeenshire",  "10",    "430",    300,    790,      850,   2370,
+                "Angus",  "10",    "300",    330,    710,      670,   2020,
+        "Argyll & Bute",   "0",    "100",    130,    300,      280,    820,
+     "Clackmannanshire",  "80",    "150",    100,    240,      230,    800,
+  "Dumfries & Galloway",   "*",      "*",    340,    790,      730,   2310,
+          "Dundee City",  "10",    "230",    360,    790,      680,   2060,
+        "East Ayrshire",  "40",    "420",    280,    640,      570,   1940,
+  "East Dunbartonshire",  "40",    "290",    190,    430,      400,   1360,
+         "East Lothian",  "10",    "380",    170,    520,      440,   1510,
+    "East Renfrewshire",  "30",     "80",    150,    370,      370,    990,
+   "Edinburgh, City of",  "30",    "930",    680,   1590,     1720,   4940,
+          "Eilean Siar",  "10",     "80",     90,    240,      240,    660,
+              "Falkirk",   "0",    "530",    350,    800,      670,   2330,
+                 "Fife",  "70",  "1,620",   1120,   2630,     1820,   7270,
+         "Glasgow City",  "50",  "1,340",   1650,   3150,     2400,   8590,
+             "Highland",   "*",      "*",    340,    820,      780,   2250,
+           "Inverclyde",   "0",    "260",    200,    460,      420,   1340,
+           "Midlothian",   "*",      "*",    150,    390,      340,   1150,
+                "Moray",  "30",    "180",    210,    500,      400,   1320,
+       "North Ayrshire",   "*",      "*",    230,    500,      490,   1400,
+    "North Lanarkshire",  "80",    "790",    760,   1490,     1130,   4250,
+       "Orkney Islands",   "0",    "110",     70,    120,      120,    410,
+      "Perth & Kinross",   "0",    "120",    150,    410,      520,   1190,
+         "Renfrewshire", "180",    "600",    330,    610,      580,   2310,
+     "Scottish Borders",  "20",    "220",    200,    500,      460,   1390,
+     "Shetland Islands",   "*",      "*",     70,    190,      160,    490,
+       "South Ayrshire",   "0",    "480",    230,    550,      650,   1910,
+    "South Lanarkshire",  "30",    "890",    600,   1320,     1010,   3850,
+             "Stirling",  "10",    "300",    150,    270,      250,    980,
+  "West Dunbartonshire",  "90",    "320",    340,    720,      590,   2070,
+         "West Lothian",  "10",    "350",    260,    490,      390,   1500,
+             "Scotland", "850", "13,160",  10940,  24470,    21300,  70710
+  ) %>% 
+  mutate(`2007` = select(.,`65-74`:`85+`) %>% rowSums()) %>% 
+  select(Local_Authority, `2007`) %>% 
+  rename(council = Local_Authority)
+```
+
+
+#Tidy and Join
+
+```{r SCOTLAND}
+pop_data_combined_2011$council <- 
+  str_replace(pop_data_combined_2011$council, "SCOTLAND", "Scotland")
+```
+
+```{r join}
+plot_table <-
+  left_join(pop_data_combined_2011, scs_2007) %>% 
+  left_join(., scs_2016)
+
+rm(list = c("pop_data_2011", "pop_data_combined_2011", "scs_2007", "scs_2016"))
+```
+
+
+#Add proportions
+
+```{r props}
+plot_table %<>% 
+  mutate(`2007` = round((`2007`/pop_over_65) * 1000, 1),
+         `2016` = round((`2016`/pop_over_65) * 1000, 1)) %>% 
+  arrange(reorder(council, -`2016`))
+```
+
+
+
+#plot
+
+```{r plot, fig.height=10, fig.width=16}
+#conditional face adjustment
+
+cond_face <- if_else(plot_table$council == "Scotland", "bold", "plain")
+cond_size <- if_else(plot_table$council == "Scotland", 20, 16)
+cond_label <- if_else(plot_table$council %in% c("Highland", "West Dunbartonshire", "Scotland"),
+                      paste0(plot_table$`2016`), paste0(""))
+
+dumb_plot  <-
+  plot_table %>% 
+  ggplot(aes(x = `2007`, xend = `2016`, y = reorder(council, -`2016`))) + 
+  geom_dumbbell(colour_x = ubdc_palette[1], colour_xend = ubdc_palette[3],
+                size_x = 3, size_xend = 4, dot_guide = TRUE) +
+  geom_text(aes(x = `2016`, y = council, label = cond_label, hjust = 1.5), 
+            size = 5, fontface = "bold", vjust = -0.2) +
+  labs(title = "Proportion of over 65s receiving home care",
+       subtitle = "2016 & 2007",
+       caption = "Standardised rate per 1000 people over 65",
+       x ="",
+       y = "") +
+  expand_limits(x = c(0, 120), y = 34) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 9)) +
+  theme(axis.text.y = element_text(face = cond_face, size = cond_size),
+        plot.title = element_text(hjust = 0))
+dumb_plot
+```
+
+
+
+
+```{r save,}
+ggsave("plots/3MT_plot.png", dumb_plot, height = 10, width = 16, dpi = 900)
+```
+
+
+
+```{r plot_tavle2}
+plot_table_2 <-
+  plot_table %>% 
+  gather(group, value, c(`2016`, `2007`)) 
+```
+
+```{r label, fig.height=9, fig.width=12}
+plot_table %>% 
+  ggplot(aes(y = reorder(council, -`2016`))) +
+  geom_point(data = plot_table_2, aes(x = value, y = reorder(council, -value), 
+                                      color = group), size = 3) +
+  geom_dumbbell(aes(x = `2007`, xend = `2016`), size=3, color="#e3e2e1", 
+                   colour_x = ubdc_palette[17], colour_xend = ubdc_palette[3],
+                   dot_guide=TRUE, dot_guide_size=0.25) +
+    
+     scale_color_manual(values = c(ubdc_palette[17], ubdc_palette[3]) )
+```
+
+
+
+
+
+
+
+
+

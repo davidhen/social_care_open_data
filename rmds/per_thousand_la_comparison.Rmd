@@ -385,14 +385,15 @@ per_thousand_table %>%
 
 Going to try a Clevland dotplot.
 
-```{r clevland, fig.height=10, fig.width=10}
+```{r clevland, fig.height=3, fig.width=4}
+theme_set(theme_cowplot(font_size = 6))
 homecare_plot_clevland<- 
   per_thousand_table %>%
   filter(council != "Highland") %>%
   ggplot(., 
        aes(x = reorder(council, -homecare_per_thousand), 
            y = homecare_per_thousand)) +
-  geom_point(size = 3, color = ubdc_palette[4]) +
+  geom_point(size = 0.5, color = ubdc_palette[4]) +
   labs(
     title = "Figure 1: Standardised rate per 1000 over-65\nreceiving home care",
     subtitle = "by Local Authority",
@@ -413,5 +414,5 @@ homecare_plot_clevland
 
 
 ```{r save_p,eval=FALSE}
-ggsave("plots/over65s_homecare_clevland.png", homecare_plot_clevland, width = 10, height = 10)
+ggsave("plots/over65s_homecare_clevland.png", homecare_plot_clevland, width = 4, height = 3)
 ```

@@ -26,9 +26,8 @@ load("produced_data/created_objects/soc_care12.rds")
 library(dplyr)
 library(forcats)
 library(ggplot2)
-library(ggthemes)
+library(cowplot)
 library(extrafont)
-theme_set(theme_tufte(base_size = 12))
 ubdc_palette <- c("#13AFD6", "#E6E600", "#F07329", "#35B14E", "#D7509A", "#2165AF",
                   "#BCD032","#866BAC", "#545A5D",  "#7A8082", "#E2D988", "#628DB7",
                   "#929B9A", "#93B8DA", "#31649B", "#FBF8D0", "#ACB2B4", "#D1DAE2")
@@ -225,6 +224,7 @@ ggplot2::ggsave(home_care_facet, filename = "plots/homecare_facet.png")
 Try a clevland dotplot
 
 ```{r clevland, fig.height = 3, fig.width=4}
+theme_set(theme_cowplot(font_size = 6))
 home_care_facet_clevland <- 
   ggplot(home_care_hrs, 
          aes(
@@ -243,10 +243,9 @@ home_care_facet_clevland <-
        caption = "2012 Social Care Survey\nHighland council removed due large amount of missing data")  +
   coord_flip() +
   theme(legend.position = "none",
-        text = element_text(size = 6),
         plot.subtitle = element_text(color="#666666"),
         plot.caption = element_text(color="#AAAAAA"),
-        axis.text.x = element_text(size = 4, face = "bold"),
+        axis.text.x = element_text(size = 3, face = "bold"),
         panel.grid.major = element_line(color = "#e6e6e6")) +
   scale_color_manual(values = ubdc_palette)
 
@@ -257,6 +256,6 @@ home_care_facet_clevland
 
 
 ```{r}
-ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, width = 4, height = 3)
+ggsave("plots/homecare_facet_clevland.png", home_care_facet_clevland, width=4, height = 3)
 ```
 
