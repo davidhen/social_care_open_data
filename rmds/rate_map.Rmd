@@ -112,10 +112,12 @@ ggplot(per_thousand_table) +
         axis.text = element_blank(),
         panel.grid = element_line(colour = "transparent"),
         legend.position = "bottom",
-        legend.text = element_text(size = 7)) +
+        legend.text = element_text(size = 7),
+        plot.caption = element_text(size = 10, colour = "#AAAAAA")) +
   labs(title = "Rate of social care for over 65s 2011/12",
        subtitle = "by Local Authority",
-       fill = "Rate per thousand people\nover 65 receiving any form\nof social care") -> any_care_map
+       fill = "Rate per thousand people\nover 65 receiving any form\nof social care",
+       caption = "Contains National Statistics data © Crown copyright and database right 2018\nContains OS data © Crown copyright and database right 2018") -> any_care_map
 any_care_map
 ```
 
@@ -132,10 +134,12 @@ ggplot(per_thousand_table) +
         axis.text = element_blank(),
         panel.grid = element_line(colour = "transparent"),
         legend.position = "bottom",
-        legend.text = element_text(size = 7)) +
+        legend.text = element_text(size = 7),
+        plot.caption = element_text(size = 10, colour = "#AAAAAA")) +
   labs(title = "Rate of homecare for over 65s 2011/12",
        subtitle = "by Local Authority",
-       fill = "Rate per thousand people\nover 65 receiving homecare") -> homecare_map
+       fill = "Rate per thousand people\nover 65 receiving homecare",
+       caption = "Contains National Statistics data © Crown copyright and database right 2018\nContains OS data © Crown copyright and database right 2018") -> homecare_map
 homecare_map
 ```
 
@@ -153,10 +157,12 @@ ggplot(per_thousand_table) +
         axis.text = element_blank(),
         panel.grid = element_line(colour = "transparent"),
         legend.position = "bottom",
-        legend.text = element_text(size = 7)) +
-  labs(title = "Rate of telecare and communiy alarms\nfor over 65s 2011/12",
+        legend.text = element_text(size = 7),
+        plot.caption = element_text(size = 10, colour = "#AAAAAA")) +
+  labs(title = "Rate of telecare and community alarms\nfor over 65s 2011/12",
        subtitle = "by Local Authority",
-       fill = "Rate per thousand people\nover 65 receiving any\ntelecare or community alarm\nservices") -> telecare_map
+       fill = "Rate per thousand people\nover 65 receiving any\ntelecare or community alarm\nservices",
+       caption = "Contains National Statistics data © Crown copyright and database right 2018\nContains OS data © Crown copyright and database right 2018") -> telecare_map
 telecare_map
 ```
 
