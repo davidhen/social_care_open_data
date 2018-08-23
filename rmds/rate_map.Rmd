@@ -1,0 +1,181 @@
+---
+title: "Social Care Survey Open Data"
+subtitle: "Simple descriptive analysis"
+output: 
+  html_document:
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/hedgi/OneDrive - University of Glasgow/GitHub/social_care_open_data')
+```
+
+#Introduction
+
+##Load packages
+
+```{r packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(sf)
+library(readxl)
+library(RColorBrewer)
+library(extrafont)
+library(classInt)
+theme_set(theme_minimal(base_size = 16, base_family = "Roboto"))
+```
+
+
+##Load data
+
+I'm going to use the `per_thousand_table` created in `per_thousand_la_comparison.Rmd` and a shapefile downloaded from the ONS Geoportal
+
+
+```{r load_data}
+load("produced_data/created_objects/per_thousand_table.rds")
+scotland <- st_read("raw_data/la_shapefiles/Local_Authority_Districts_December_2017_Full_Clipped_Boundaries_in_Great_Britain.shp")
+la_lookup <- read_xlsx("raw_data/00534447.xlsx", sheet = "SIMD16 DZ look-up data")
+```
+
+
+#Data wrangle
+
+#LA lookup data
+
+```{r wrangle_lookup}
+la_lookup %<>% 
+  select(LAname) %>% 
+  distinct #Keep unique names 
+
+#Change Western Isles to match shapefile
+la_lookup$LAname <- str_replace(la_lookup$LAname, "Na h-Eileanan an Iar", "Na h-Eileanan Siar") 
+```
+
+##Shape file
+
+The shape file has every local authority in the UK - I just want Scottish Local Authorities. 
+
+```{r wrangle_shape}
+scotland %<>%
+  filter(lad17nm %in% la_lookup$LAname) %>% 
+  rename(council = lad17nm)
+```
+
+##Data
+
+Some differences in names here also
+
+```{r wrangle_data}
+per_thousand_table$council <- str_replace(per_thousand_table$council, "Edinburgh, City of", "City of Edinburgh")
+per_thousand_table$council <- str_replace(per_thousand_table$council, "Eilean Siar", "Na h-Eileanan Siar")
+per_thousand_table$council <- str_replace_all(per_thousand_table$council, "&", "and")
+
+```
+
+#Join data to shape file
+
+```{r join}
+per_thousand_table %<>%
+  full_join(., scotland, by = "council")
+rm(scotland)
+rm(la_lookup)
+```
+
+#Plot
+
+#Create classes for home care
+
+*not used*
+
+```{r label, options}
+classes <- classIntervals(per_thousand_table$homecare_per_thousand, n = 5, style = "jenks")
+per_thousand_table %<>%
+  mutate(homecare_class = cut(homecare_per_thousand, breaks = classes$brks, include.lowest = TRUE))
+```
+
+##Any social care
+
+```{r plot, fig.height=10, fig.width=9}
+ggplot(per_thousand_table) +
+  geom_sf(aes(fill = any_care_per_thousand),
+              colour = "black",
+              size = 0.3) +
+  scale_fill_distiller(palette = "Blues",
+                      direction = 1) +
+  theme(line = element_blank(),
+        axis.text = element_blank(),
+        panel.grid = element_line(colour = "transparent"),
+        legend.position = "bottom",
+        legend.text = element_text(size = 7)) +
+  labs(title = "Rate of social care for over 65s 2011/12",
+       subtitle = "by Local Authority",
+       fill = "Rate per thousand people\nover 65 receiving any form\nof social care") -> any_care_map
+any_care_map
+```
+
+##Home care only
+
+```{r plot_homecare, fig.height=10, fig.width=9}
+ggplot(per_thousand_table) +
+  geom_sf(aes(fill = homecare_per_thousand),
+              colour = "black",
+              size = 0.3) +
+  scale_fill_distiller(palette = "Blues",
+                      direction = 1) +
+  theme(line = element_blank(),
+        axis.text = element_blank(),
+        panel.grid = element_line(colour = "transparent"),
+        legend.position = "bottom",
+        legend.text = element_text(size = 7)) +
+  labs(title = "Rate of homecare for over 65s 2011/12",
+       subtitle = "by Local Authority",
+       fill = "Rate per thousand people\nover 65 receiving homecare") -> homecare_map
+homecare_map
+```
+
+
+##Telecare and alarms
+
+```{r plot_tele, fig.height=10, fig.width=9}
+ggplot(per_thousand_table) +
+  geom_sf(aes(fill = telecare_per_thousand),
+              colour = "black",
+              size = 0.3) +
+  scale_fill_distiller(palette = "Blues",
+                      direction = 1) +
+  theme(line = element_blank(),
+        axis.text = element_blank(),
+        panel.grid = element_line(colour = "transparent"),
+        legend.position = "bottom",
+        legend.text = element_text(size = 7)) +
+  labs(title = "Rate of telecare and communiy alarms\nfor over 65s 2011/12",
+       subtitle = "by Local Authority",
+       fill = "Rate per thousand people\nover 65 receiving any\ntelecare or community alarm\nservices") -> telecare_map
+telecare_map
+```
+
+
+
+
+#Save
+
+```{r save, eval=FALSE}
+ggsave("plots/anycare_map.png", any_care_map, height = 10, width = 9, dpi = 600)
+ggsave("plots/homecare_map.png", homecare_map, height = 10, width = 9, dpi = 600)
+ggsave("plots/telecare_map.png", telecare_map, height = 10, width = 9, dpi = 600)
+```
+
+
+#Session Info
+
+```{r session_info}
+devtools::session_info()
+```
+
+
