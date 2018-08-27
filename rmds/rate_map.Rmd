@@ -67,6 +67,10 @@ scotland %<>%
   rename(council = lad17nm)
 ```
 
+```{r save_shapes}
+save(scotland, file = "/Users/hedgi/OneDrive - University of Glasgow/GitHub/scotland_la_shp.rds")
+```
+
 ##Data
 
 Some differences in names here also
